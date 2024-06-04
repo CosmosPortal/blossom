@@ -1,0 +1,26 @@
+{
+  "name": "blossom",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsup",
+    "start": "node ."
+  },
+  "keywords": [],
+  "author": "Cosmos Portal",
+  "license": "ISC",
+  "devDependencies": {
+    "tsup": "^8.1.0",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "@cosmosportal/blossom.utils": "^0.3.0",
+    "commandkit": "^0.1.10",
+    "discord-api-types": "^0.37.87",
+    "discord.js": "^14.15.3",
+    "dotenv": "^16.4.5",
+    "sqlite3": "^5.1.7",
+    "typeorm": "^0.3.20"
+  },
+  "description": ""
+}
