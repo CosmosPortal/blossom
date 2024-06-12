@@ -28,8 +28,21 @@ var import_commandkit = require("commandkit");
 var import_discord = require("discord.js");
 var path = __toESM(require("path"));
 var client = new import_discord.Client({
-  intents: [import_discord.GatewayIntentBits.GuildMembers, import_discord.GatewayIntentBits.GuildMessages, import_discord.GatewayIntentBits.Guilds, import_discord.GatewayIntentBits.MessageContent],
-  partials: [import_discord.Partials.Channel, import_discord.Partials.GuildMember, import_discord.Partials.GuildScheduledEvent, import_discord.Partials.Message, import_discord.Partials.Reaction, import_discord.Partials.ThreadMember, import_discord.Partials.User],
+  intents: [
+    import_discord.GatewayIntentBits.GuildMembers,
+    import_discord.GatewayIntentBits.GuildMessages,
+    import_discord.GatewayIntentBits.Guilds,
+    import_discord.GatewayIntentBits.MessageContent
+  ],
+  partials: [
+    import_discord.Partials.Channel,
+    import_discord.Partials.GuildMember,
+    import_discord.Partials.GuildScheduledEvent,
+    import_discord.Partials.Message,
+    import_discord.Partials.Reaction,
+    import_discord.Partials.ThreadMember,
+    import_discord.Partials.User
+  ],
   allowedMentions: {
     parse: []
   }
@@ -38,7 +51,12 @@ new import_commandkit.CommandKit({
   client,
   commandsPath: path.join(__dirname, "Commands"),
   eventsPath: path.join(__dirname, "Events"),
-  devGuildIds: ["1052139816499814471", "1136563432443875338"],
-  devUserIds: ["515989471645401088"]
+  devGuildIds: [
+    "1052139816499814471",
+    "1136563432443875338"
+  ],
+  devUserIds: [
+    "515989471645401088"
+  ]
 });
 client.login(process.env.CLIENT_TOKEN);

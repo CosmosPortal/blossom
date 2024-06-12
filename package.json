@@ -10,13 +10,14 @@
   "author": "Cosmos Portal",
   "license": "ISC",
   "devDependencies": {
+    "@swc/core": "^1.5.28",
     "tsup": "^8.1.0",
     "typescript": "^5.4.5"
   },
   "dependencies": {
-    "@cosmosportal/blossom.utils": "^0.3.0",
+    "@cosmosportal/blossom.utils": "^0.4.0",
     "commandkit": "^0.1.10",
-    "discord-api-types": "^0.37.87",
+    "discord-api-types": "^0.37.88",
     "discord.js": "^14.15.3",
     "dotenv": "^16.4.5",
     "sqlite3": "^5.1.7",
