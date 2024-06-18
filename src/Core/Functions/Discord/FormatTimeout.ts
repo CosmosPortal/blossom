@@ -1,3 +1,13 @@
+/**
+ * Formats a timeout to a valid time
+ * @param {number} seconds - How long the timeout is
+ * @param {string} separator - The separator to join the values
+ * 
+ * @example
+ * ```ts
+ * const format = FormatTimeout(60, ", ");
+ * ```
+ */
 export function FormatTimeout(seconds: number, separator: string = ","): string {
     const times = [
         { unit: "Week", seconds: 604800 },

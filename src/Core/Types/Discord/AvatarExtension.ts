@@ -1,0 +1,1 @@
+export type AvatarExtension = "jpg" | "png" | "webp" | "jpeg" | "gif" | "Default";

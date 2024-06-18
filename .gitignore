@@ -1,12 +1,11 @@
-# Database
+# Directories
 /Storage
+dist/
+/node_modules
 
 # Notes
 /ignore
 .env
-
-# Dependency Directories
-/node_modules
 
 # OS
 .DS_Store

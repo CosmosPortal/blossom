@@ -1,14 +1,25 @@
-import { FindOneOptions, ObjectType } from "typeorm";
-import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
+import type { FindOneOptions, ObjectType } from "typeorm";
+import type { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
+import type { ObjectMap } from "../../Interfaces";
 import { Database } from "../../Classes";
 import { DatabaseConnect } from "./DatabaseConnect";
 import { FindOrCreateEntity } from "./FindOrCreateEntity";
-import { ObjectMap } from "../../Interfaces";
 
-export async function UpdateTogglePlugin<T extends ObjectMap>(entity: ObjectType<T>, criteria: FindOneOptions<T>["where"], values: string[]) {
+/**
+ * Enables or disable a plugin toggle value
+ * @param {ObjectType<T>} entity - The entity to update
+ * @param {FindOneOptions<T>["where"]} criteria - Where it's located
+ * @param {string[]} values - The toggle features to update
+ * 
+ * @example
+ * ```ts
+ * await UpdateTogglePlugin(GuildModerationSetting, { Snowflake: interaction.guild.id }, interaction.values);
+ * ```
+ */
+export async function UpdateTogglePlugin<T extends ObjectMap>(entity: ObjectType<T>, criteria: FindOneOptions<T>["where"], values: string[]): Promise<void> {
     if (!Database.isInitialized) await DatabaseConnect();
 
-    let data = await FindOrCreateEntity(entity, criteria);
+    const data = await FindOrCreateEntity(entity, criteria);
 
     for (const value of values) {
         const current_value = data[value] ?? false;

@@ -1,27 +1,35 @@
 {
   "name": "blossom",
-  "version": "0.1.0",
+  "description": "Cosmos Portal presents to you Blossom, a multi-purpose Discord application.",
+  "version": "0.2.0",
+  "author": "Cosmos Portal",
+  "license": "MIT",
+  "keywords": [],
   "main": "dist/index.js",
   "scripts": {
     "build": "tsup",
     "start": "node ."
   },
-  "keywords": [],
-  "author": "Cosmos Portal",
-  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CosmosPortal/blossom.git"
+  },
+  "bugs": {
+    "url": "https://github.com/CosmosPortal/blossom/issues"
+  },
+  "homepage": "https://github.com/CosmosPortal/blossom#readme",
   "devDependencies": {
-    "@swc/core": "^1.5.28",
+    "@swc/core": "^1.6.1",
     "tsup": "^8.1.0",
     "typescript": "^5.4.5"
   },
   "dependencies": {
-    "@cosmosportal/blossom.utils": "^0.4.0",
+    "@cosmosportal/blossom.utils": "^0.5.0",
     "commandkit": "^0.1.10",
-    "discord-api-types": "^0.37.88",
+    "discord-api-types": "^0.37.89",
     "discord.js": "^14.15.3",
     "dotenv": "^16.4.5",
     "sqlite3": "^5.1.7",
     "typeorm": "^0.3.20"
-  },
-  "description": ""
+  }
 }

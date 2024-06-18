@@ -1,10 +1,10 @@
 import { DataSource } from "typeorm";
-import { AccountSecurity, Developer, GuildModerationSetting, GuildRole } from "../Entities";
+import { AccountSecurity, Developer, GuildID, GuildModerationSetting, GuildRole, GuildSystem, InfractionSystem, MemberID } from "../Entities";
 
 export const Database = new DataSource({
     type: "sqlite",
     database: "./storage/database.sqlite",
-    entities: [ AccountSecurity, Developer, GuildModerationSetting, GuildRole ],
+    entities: [ AccountSecurity, Developer, GuildID, GuildModerationSetting, GuildRole, GuildSystem, InfractionSystem, MemberID ],
     logging: false,
     synchronize: true
 });

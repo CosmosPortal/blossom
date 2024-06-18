@@ -1,0 +1,1 @@
+export type ModifiedInfractionType = "MarkActive" | "MarkInactive" | "Reason" | "RemovalReason";

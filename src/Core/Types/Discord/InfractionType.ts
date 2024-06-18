@@ -1,0 +1,1 @@
+export type InfractionType = "BanAdd" | "BanRemove" | "BanSoft" | "Kick" | "TimeoutAdd" | "TimeoutRemove" | "WarnAdd" | "WarnRemove";

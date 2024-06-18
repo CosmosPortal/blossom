@@ -3,7 +3,7 @@ import { Column, Entity, PrimaryColumn } from "typeorm";
 @Entity({ name: "AccountSecurity" })
 export class AccountSecurity {
     @PrimaryColumn()
-    snowflake!: string;
+    Snowflake!: string;
 
     @Column({ default: 1 })
     AccountType!: number;

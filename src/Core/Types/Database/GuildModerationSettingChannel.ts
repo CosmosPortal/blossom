@@ -1,0 +1,1 @@
+export type GuildModerationSettingChannel = "MessageReportChannel" | "ModerationPrivateLogChannel" | "ModerationPublicLogChannel" | "UserReportChannel";
