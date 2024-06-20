@@ -6,5 +6,8 @@ export const Database = new DataSource({
     database: "./storage/database.sqlite",
     entities: [ AccountSecurity, Developer, GuildID, GuildModerationSetting, GuildRole, GuildSystem, InfractionSystem, MemberID ],
     logging: false,
-    synchronize: true
+    synchronize: false,
+    migrations: ["dist/Core/Migrations/*.js"]
 });
+
+export const Connect = async () => await  Database.initialize();

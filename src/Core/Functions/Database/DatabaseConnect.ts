@@ -1,4 +1,4 @@
-import { Database } from "../../Classes";
+import { Connect, Database } from "../../Classes";
 
 /**
  * Connects to the TypeORM database
@@ -6,7 +6,7 @@ import { Database } from "../../Classes";
 export async function DatabaseConnect(): Promise<void> {
     if (Database.isInitialized) return;
 
-    await Database.initialize();
+    await Connect();
 
-    if (!Database.isInitialized) await Database.initialize();
+    if (!Database.isInitialized) await Connect();
 };
