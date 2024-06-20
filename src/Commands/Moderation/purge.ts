@@ -70,7 +70,7 @@ export async function run({ client, handler, interaction }: SlashCommandProps): 
 
     const channel = interaction.options.getChannel("channel", false, [ ChannelType.AnnouncementThread, ChannelType.GuildAnnouncement, ChannelType.GuildStageVoice, ChannelType.GuildText, ChannelType.GuildVoice, ChannelType.PrivateThread, ChannelType.PublicThread ]) ?? interaction.channel;
     if (!channel) return void await Blossom.CreateInteractionError(interaction, `An issue occured with fetching the channel. The channel either no longer exist or ${client.user.username} couldn't fetch the channel.`);
-    if (!HasChannelPermissions(client, channel.id, client.user.id, [ PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.ManageChannels ])) return void await Blossom.CreateInteractionError(interaction, `${client.user.username} doesn't have enough permission to run </${interaction.commandName} ${interaction.options.getSubcommand()}:${interaction.commandId}>. Ensure ${client.user.username} has **View Channel** and **Manage Messages** permission in <#${channel.id}>.`);
+    if (!await HasChannelPermissions(client, channel.id, client.user.id, [ PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.ManageChannels ])) return void await Blossom.CreateInteractionError(interaction, `${client.user.username} doesn't have enough permission to run </${interaction.commandName} ${interaction.options.getSubcommand()}:${interaction.commandId}>. Ensure ${client.user.username} has **View Channel** and **Manage Messages** permission in <#${channel.id}>.`);
 
     const channel_messages = await channel.messages.fetch({ limit: 100 });
     const filter_messages = [...channel_messages.filter((x) => !x.pinned).values()];
