@@ -1,6 +1,6 @@
 import { ChatInputCommandBuilder, GuildChannelCount, MemberBannedStatus } from "@cosmosportal/blossom.utils";
 import { ApplicationCommandOptionType, ChannelType, EmbedBuilder } from "discord.js";
-import { Blossom, DiscordBadges, FindOrCreateEntity, FormatTimeout, GuildID, GuildModerationSetting, GuildRole, MemberID, Sentry } from "../../Core";
+import { Blossom, DiscordBadges, FindOrCreateEntity, FormatTime, GuildID, GuildModerationSetting, GuildRole, MemberID, Sentry } from "../../Core";
 import type { CommandData, SlashCommandProps } from "commandkit";
 
 export const data: CommandData = new ChatInputCommandBuilder({
@@ -53,7 +53,7 @@ export async function run({ client, handler, interaction }: SlashCommandProps): 
         .setFields(
             { name: "General Information", value: `- **Name**\n - ${interaction.guild.name}\n - ${interaction.guild.id}\n- **Description**\n> ${!interaction.guild.description ? "No server description" : interaction.guild.description}\n- **Owner**\n - ${guild_owner.user.tag}\n - ${interaction.guild.ownerId}\n- **Creation** • <t:${Math.trunc(Math.floor(interaction.guild.createdTimestamp / 1000))}:D>` },
             { name: "Miscellaneous Information", value: `- **Channel [${await GuildChannelCount(interaction.guild, [ ChannelType.AnnouncementThread, ChannelType.GuildAnnouncement, ChannelType.GuildForum, ChannelType.GuildMedia, ChannelType.GuildStageVoice, ChannelType.GuildText, ChannelType.GuildVoice, ChannelType.PrivateThread, ChannelType.PublicThread ])}]**\n - **Text** • ${await GuildChannelCount(interaction.guild, [ ChannelType.GuildAnnouncement, ChannelType.GuildForum, ChannelType.GuildText ])}\n - **Thread** • ${await GuildChannelCount(interaction.guild, [ ChannelType.AnnouncementThread, ChannelType.PrivateThread, ChannelType.PublicThread ])}\n - **Voice** • ${await GuildChannelCount(interaction.guild, [ ChannelType.GuildStageVoice, ChannelType.GuildVoice ])}\n- **Member** • ${interaction.guild.memberCount.toLocaleString()}\n- **Roles** • ${interaction.guild.roles.cache.size}` },
-            { name: `${client.user.username} Information`, value: `${guild_moderation_setting.AppealLinkStatus && guild_moderation_setting.AppealLink ? `- **Appeal** • [View Link](${guild_moderation_setting.AppealLink} 'Appeal Link')\n` : ""}- **Default Timeout Timer** • ${FormatTimeout(guild_moderation_setting.TimeoutTimer)}\n- **Case Created** • ${guild_id.InfractionCreation.toLocaleString()} Cases\n- **Moderation Reason Required?** • ${guild_moderation_setting.RequireReason ? "Yes" : "No"}` }
+            { name: `${client.user.username} Information`, value: `${guild_moderation_setting.AppealLinkStatus && guild_moderation_setting.AppealLink ? `- **Appeal** • [View Link](${guild_moderation_setting.AppealLink} 'Appeal Link')\n` : ""}- **Default Timeout Timer** • ${FormatTime(guild_moderation_setting.TimeoutTimer, ", ")}\n- **Case Created** • ${guild_id.InfractionCreation.toLocaleString()} Cases\n- **Moderation Reason Required?** • ${guild_moderation_setting.RequireReason ? "Yes" : "No"}` }
         )
         .setImage(interaction.guild.bannerURL({ forceStatic: false, size: 4096 }))
         .setColor(Blossom.DefaultHex());

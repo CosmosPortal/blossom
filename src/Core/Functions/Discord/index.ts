@@ -1,3 +1,3 @@
 export * from "./FormatGuildInfractions";
 export * from "./FormatMemberInfractions";
-export * from "./FormatTimeout";
+export * from "./FormatTime";

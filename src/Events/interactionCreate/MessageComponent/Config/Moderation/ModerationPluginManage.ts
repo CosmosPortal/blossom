@@ -1,6 +1,6 @@
 import { ChannelSelectMenuBuilder, GuildChannelExist, ModalBuilder, StringSelectMenuBuilder } from "@cosmosportal/blossom.utils";
 import { ChannelType, EmbedBuilder, TextInputStyle, type Client, type MessageComponentInteraction } from "discord.js";
-import { Blossom, FindOrCreateEntity, FormatTimeout, GuildModerationSetting, Sentry } from "../../../../../Core";
+import { Blossom, FindOrCreateEntity, FormatTime, GuildModerationSetting, Sentry } from "../../../../../Core";
 import type { CommandKit } from "commandkit";
 
 export default async function (interaction: MessageComponentInteraction, client: Client<true>, handler: CommandKit): Promise<undefined> {
@@ -115,7 +115,7 @@ export default async function (interaction: MessageComponentInteraction, client:
         await interaction.deferReply({ ephemeral: true });
 
         const embed_one = new EmbedBuilder()
-        .setDescription(`## Overview\n- **Timeout Timer** • ${FormatTimeout(guild_moderation_setting.TimeoutTimer, ", ")}`)
+        .setDescription(`## Overview\n- **Timeout Timer** • ${FormatTime(guild_moderation_setting.TimeoutTimer, ", ")}`)
         .setColor(Blossom.DefaultHex());
 
         const action_row_one = new StringSelectMenuBuilder({

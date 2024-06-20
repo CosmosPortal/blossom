@@ -2,7 +2,7 @@ import { ButtonBuilder, GuildChannelExist, HasChannelPermissions, WebhookExist }
 import { ButtonStyle, EmbedBuilder, PermissionsBitField, WebhookClient, type Channel, type NewsChannel, type TextChannel } from "discord.js";
 import { GuildModerationSetting } from "../Entities";
 import { ActionType, Color } from "../Enums";
-import { FindOrCreateEntity, FormatTimeout, UpdateEntity } from "../Functions";
+import { FindOrCreateEntity, FormatTime, UpdateEntity } from "../Functions";
 import type { InfractionMessageData } from "../Interfaces";
 import type { InfractionType } from "../Types";
 
@@ -45,7 +45,7 @@ export class InfractionMessage {
             BanRemove: `**${user.tag}**'s ban has been removed in **${this._data.guild.name}**!`,
             BanSoft: `**${user.tag}** has been soft banned in **${this._data.guild.name}**!`,
             Kick: `**${user.tag}** has been kicked from **${this._data.guild.name}**!`,
-            TimeoutAdd: `**${user.tag}** has been timed out in **${this._data.guild.name}** for ${FormatTimeout(this._data.duration ?? 0)}!`,
+            TimeoutAdd: `**${user.tag}** has been timed out in **${this._data.guild.name}** for ${FormatTime(this._data.duration ?? 0, ", ")}!`,
             TimeoutRemove: `**${user.tag}**'s timeout has been removed in **${this._data.guild.name}**!`,
             WarnAdd: `**${user.tag}** has been warned in **${this._data.guild.name}**!`,
             WarnRemove: `**${user.tag}**'s warning has been removed in **${this._data.guild.name}**!`
@@ -56,7 +56,7 @@ export class InfractionMessage {
         .setAuthor({ name: `Case #${this._data.infraction.CaseID} | ${ActionType[this._data.type]}` })
         .setDescription(description[this._data.type])
         .setFields(
-            { name: "Moderation Information", value: `- **Action ID** • ${this._data.infraction.ActionID}${this._data.duration ? `\n- **Duration** • ${FormatTimeout(this._data.duration)}` : ""}` },
+            { name: "Moderation Information", value: `- **Action ID** • ${this._data.infraction.ActionID}${this._data.duration ? `\n- **Duration** • ${FormatTime(this._data.duration, ", ")}` : ""}` },
             { name: "Reason", value: this._data.infraction.RemovalReason ? this._data.infraction.RemovalReason : this._data.infraction.Reason }
         )
         .setColor(Color[this._data.type]);
@@ -91,7 +91,7 @@ export class InfractionMessage {
             BanRemove: `Your ban in **${this._data.guild.name}** has been removed!`,
             BanSoft: `You have been soft banned in **${this._data.guild.name}**!`,
             Kick: `You have been kicked from **${this._data.guild.name}**!`,
-            TimeoutAdd: `You have been timed out in **${this._data.guild.name}** for ${FormatTimeout(this._data.duration ?? 0)}!`,
+            TimeoutAdd: `You have been timed out in **${this._data.guild.name}** for ${FormatTime(this._data.duration ?? 0, ", ")}!`,
             TimeoutRemove: `Your timeout in **${this._data.guild.name}** was removed!`,
             WarnAdd: `You have been warned in **${this._data.guild.name}**!`,
             WarnRemove: `Your warning has been removed in **${this._data.guild.name}**!`
@@ -101,7 +101,7 @@ export class InfractionMessage {
         .setThumbnail(user.displayAvatarURL({ forceStatic: false, size: 4096 }))
         .setAuthor({ name: `Case #${this._data.infraction.CaseID} | ${ActionType[this._data.type]}` })
         .addFields(
-            { name: "Moderation Information", value: `${this._data.infraction.ActionID ? `- **Action ID** • ${this._data.infraction.ActionID}\n` : ""}- **Creation** • <t:${Math.trunc(Math.floor(Number(this._data.infraction.CreationTimestamp) / 1000))}:D>\n${this._data.duration ? `- **Duration** • ${FormatTimeout(this._data.duration)}\n` : ""}- **Status** • ${this._data.infraction.Active == true ? "Active" : "Inactive"}` },
+            { name: "Moderation Information", value: `${this._data.infraction.ActionID ? `- **Action ID** • ${this._data.infraction.ActionID}\n` : ""}- **Creation** • <t:${Math.trunc(Math.floor(Number(this._data.infraction.CreationTimestamp) / 1000))}:D>\n${this._data.duration ? `- **Duration** • ${FormatTime(this._data.duration, ", ")}\n` : ""}- **Status** • ${this._data.infraction.Active == true ? "Active" : "Inactive"}` },
             { name: "Reason", value: this._data.type === "WarnRemove" && this._data.infraction.RemovalReason ? this._data.infraction.RemovalReason : this._data.infraction.Reason }
         )
         .setColor(Color[this._data.type])
@@ -265,7 +265,7 @@ export class InfractionMessage {
         .setThumbnail(user.displayAvatarURL({ forceStatic: false, size: 4096 }))
         .setAuthor({ name: `Case #${this._data.infraction.CaseID} | ${ActionType[this._data.type]}` })
         .addFields(
-            { name: "Moderation Information", value: `${this._data.infraction.ActionID ? `- **Action ID** • ${this._data.infraction.ActionID}\n` : ""}- **Creation** • <t:${Math.trunc(Math.floor(Number(this._data.infraction.CreationTimestamp) / 1000))}:D>\n${this._data.duration ? `- **Duration** • ${FormatTimeout(this._data.duration)}\n` : ""}- **Status** • ${this._data.infraction.Active == true ? "Active" : "Inactive"}\n- **Staff Member** • ${this._data.infraction.StaffUsername} [\`${this._data.infraction.StaffID}\`]\n- **Target Member** • ${this._data.infraction.TargetUsername} [\`${this._data.infraction.TargetID}\`]` },
+            { name: "Moderation Information", value: `${this._data.infraction.ActionID ? `- **Action ID** • ${this._data.infraction.ActionID}\n` : ""}- **Creation** • <t:${Math.trunc(Math.floor(Number(this._data.infraction.CreationTimestamp) / 1000))}:D>\n${this._data.duration ? `- **Duration** • ${FormatTime(this._data.duration, ", ")}\n` : ""}- **Status** • ${this._data.infraction.Active == true ? "Active" : "Inactive"}\n- **Staff Member** • ${this._data.infraction.StaffUsername} [\`${this._data.infraction.StaffID}\`]\n- **Target Member** • ${this._data.infraction.TargetUsername} [\`${this._data.infraction.TargetID}\`]` },
             { name: "Reason", value: this._data.type === "WarnRemove" && this._data.infraction.RemovalReason ? this._data.infraction.RemovalReason : this._data.infraction.Reason }
         )
         .setColor(Color[this._data.type]);

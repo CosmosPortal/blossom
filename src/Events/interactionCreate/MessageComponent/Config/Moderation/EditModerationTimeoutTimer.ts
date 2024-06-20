@@ -1,6 +1,6 @@
 import { StringSelectMenuBuilder } from "@cosmosportal/blossom.utils";
 import { EmbedBuilder, type Client, type MessageComponentInteraction } from "discord.js";
-import { Blossom, FindOrCreateEntity, FormatTimeout, GuildModerationSetting, Sentry, UpdateEntity } from "../../../../../Core";
+import { Blossom, FindOrCreateEntity, FormatTime, GuildModerationSetting, Sentry, UpdateEntity } from "../../../../../Core";
 import type { CommandKit } from "commandkit";
 
 export default async function (interaction: MessageComponentInteraction, client: Client<true>, handler: CommandKit): Promise<undefined> {
@@ -17,7 +17,7 @@ export default async function (interaction: MessageComponentInteraction, client:
     const guild_moderation_setting = await FindOrCreateEntity(GuildModerationSetting, { Snowflake: interaction.guild.id });
 
     const embed_one = new EmbedBuilder()
-    .setDescription(`## Overview\n- **Timeout Timer** • ${FormatTimeout(guild_moderation_setting.TimeoutTimer, ", ")}`)
+    .setDescription(`## Overview\n- **Timeout Timer** • ${FormatTime(guild_moderation_setting.TimeoutTimer, ", ")}`)
     .setColor(Blossom.DefaultHex());
 
     const action_row_one = new StringSelectMenuBuilder({

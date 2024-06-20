@@ -1,6 +1,6 @@
 import { ButtonBuilder, CropText, GuildChannelExist, IsValidURLFormat, StringSelectMenuBuilder } from "@cosmosportal/blossom.utils";
 import { ButtonStyle, EmbedBuilder, type Client, type ModalSubmitInteraction } from "discord.js";
-import { Blossom, FindOrCreateEntity, FormatTimeout, GuildModerationSetting, Sentry, UpdateEntity } from "../../../../../Core";
+import { Blossom, FindOrCreateEntity, FormatTime, GuildModerationSetting, Sentry, UpdateEntity } from "../../../../../Core";
 import type { CommandKit } from "commandkit";
 
 export default async function (interaction: ModalSubmitInteraction, client: Client<true>, handler: CommandKit): Promise<undefined> {
@@ -22,7 +22,7 @@ export default async function (interaction: ModalSubmitInteraction, client: Clie
     const user_report_channel = guild_moderation_setting.UserReportChannel === "0" ? "Add Channel?" : await GuildChannelExist(interaction.guild, guild_moderation_setting.UserReportChannel) ? `<#${guild_moderation_setting.UserReportChannel}>` : "Channel no longer available.";
 
     const embed_one = new EmbedBuilder()
-    .setDescription(`## Overview\n- **Appeal Link** • ${!guild_moderation_setting.AppealLink ? "No appeal link has been set." : CropText(guild_moderation_setting.AppealLink, 47, true)}\n- **Delete Message History for Ban** • **${guild_moderation_setting.BanDeleteMessagesHistory}** days worth of messages.\n- **Message Report Channel** • ${message_report_channel}\n- **Private Log Channel** • ${private_log_channel}\n- **Public Log Channel** • ${public_log_channel}\n- **Timeout Timer** • ${FormatTimeout(guild_moderation_setting.TimeoutTimer, ", ")}\n- **User Report Channel** • ${user_report_channel}`)
+    .setDescription(`## Overview\n- **Appeal Link** • ${!guild_moderation_setting.AppealLink ? "No appeal link has been set." : CropText(guild_moderation_setting.AppealLink, 47, true)}\n- **Delete Message History for Ban** • **${guild_moderation_setting.BanDeleteMessagesHistory}** days worth of messages.\n- **Message Report Channel** • ${message_report_channel}\n- **Private Log Channel** • ${private_log_channel}\n- **Public Log Channel** • ${public_log_channel}\n- **Timeout Timer** • ${FormatTime(guild_moderation_setting.TimeoutTimer, ", ")}\n- **User Report Channel** • ${user_report_channel}`)
     .setColor(Blossom.DefaultHex());
 
     const action_row_one = new ButtonBuilder()
