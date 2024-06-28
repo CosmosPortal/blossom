@@ -1,4 +1,4 @@
-import type { InfractionType, Snowflake } from "../Types";
+import type { ActionID, InfractionType, Snowflake } from "../Types";
 
 export interface InfractionCreation {
     /**
@@ -8,7 +8,7 @@ export interface InfractionCreation {
     /**
      * The infraction aciton ID
      */
-    ActionID: string;
+    ActionID: ActionID;
     /**
      * Whether the infraction is active or not
      */
@@ -36,7 +36,7 @@ export interface InfractionCreation {
     /**
      * The staff ID that removed the infraction
      */
-    RemovalStaffID: string;
+    RemovalStaffID: Snowflake;
     /**
      * The staff username that removed the infraction
      */
@@ -44,7 +44,7 @@ export interface InfractionCreation {
     /**
      * The staff ID who created the infraction
      */
-    StaffID: string;
+    StaffID: Snowflake;
     /**
      * The staff username who created the infraction
      */
@@ -52,7 +52,7 @@ export interface InfractionCreation {
     /**
      * The user ID the infraction belongs to
      */
-    TargetID: string;
+    TargetID: Snowflake;
     /**
      * The user username the infraction belongs to
      */

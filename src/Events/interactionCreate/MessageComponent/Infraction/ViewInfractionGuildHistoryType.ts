@@ -1,6 +1,6 @@
 import { ButtonBuilder, StringSelectMenuBuilder } from "@cosmosportal/blossom.utils";
 import { ButtonStyle, EmbedBuilder, type Client, type MessageComponentInteraction } from "discord.js";
-import { ActionType, Blossom, FormatGuildInfractions, Sentry, type InfractionType } from "../../../../Core";
+import { ActionTypeName, Blossom, FormatInfraction, Sentry, type InfractionType } from "../../../../Core";
 import type { CommandKit } from "commandkit";
 
 export default async function (interaction: MessageComponentInteraction, client: Client<true>, handler: CommandKit): Promise<undefined> {
@@ -8,7 +8,7 @@ export default async function (interaction: MessageComponentInteraction, client:
     if (await Sentry.MaintenanceModeStatus(client, interaction.user.id) && await Sentry.MaintenanceModeStatus(client, interaction.guild.id)) return void await Blossom.CreateInteractionError(interaction, "The developers are currently performing scheduled maintenance. Sorry for any inconvenience.");
     if (!await Sentry.IsAuthorized(interaction.guild.id)) return void await Blossom.CreateInteractionError(interaction, `${interaction.guild.name} is unauthorized to use ${client.user.username}.`);
     if (!await Sentry.IsAuthorized(interaction.user.id)) return void await Blossom.CreateInteractionError(interaction, `You are unauthorized to use ${client.user.username}.`);
-    if (!await Sentry.BlossomGuildManagementAuthorization(interaction.guild, interaction.member)) return void await Blossom.CreateInteractionError(interaction, `This feature is restricted to members of the Management Team in ${interaction.guild.name}.`);
+    if (!await Sentry.HasManagementAuthorization(interaction.guild, interaction.member)) return void await Blossom.CreateInteractionError(interaction, `This feature is restricted to members of the Management Team in ${interaction.guild.name}.`);
 
     await interaction.deferUpdate();
 
@@ -37,17 +37,17 @@ export default async function (interaction: MessageComponentInteraction, client:
         custom_id: `ViewInfractionGuildHistoryType_${is_inactive}`,
         select_options: [
             {
-                label: "BanAdd",
+                label: "Ban Add",
                 value: "BanAdd",
                 default: type === "BanAdd"
             },
             {
-                label: "BanRemove",
+                label: "Ban Remove",
                 value: "BanRemove",
                 default: type === "BanRemove"
             },
             {
-                label: "BanSoft",
+                label: "Ban Soft",
                 value: "BanSoft",
                 default: type === "BanSoft"
             },
@@ -57,17 +57,22 @@ export default async function (interaction: MessageComponentInteraction, client:
                 default: type === "Kick"
             },
             {
-                label: "TimeoutAdd",
+                label: "Timeout Add",
                 value: "TimeoutAdd",
                 default: type === "TimeoutAdd"
             },
             {
-                label: "TimeoutRemove",
+                label: "Timeout Remove",
                 value: "TimeoutRemove",
                 default: type === "TimeoutRemove"
             },
             {
-                label: "WarnAdd",
+                label: "Verbal Warn",
+                value: "WarnVerbal",
+                default: type === "WarnVerbal"
+            },
+            {
+                label: "Warn Add",
                 value: "WarnAdd",
                 default: type === "WarnAdd"
             }
@@ -75,8 +80,11 @@ export default async function (interaction: MessageComponentInteraction, client:
         placeholder: "Infraction Types"
     }).BuildActionRow();
 
-    const infraction_history = await FormatGuildInfractions(interaction.guild.id, type, is_inactive);
-    if (!infraction_history) return void await Blossom.CreateInteractionError(interaction, `${interaction.guild.name} doesn't have any ${ActionType[type].toLowerCase()} action IDs that exist. To view inactive action IDs, make sure \`is_inactive\` option is toggle to \`true\`.`);
+    const infraction_history = await FormatInfraction(interaction.guild.id, {
+        is_inactive: is_inactive,
+        type: type
+    });
+    if (!infraction_history) return void await Blossom.CreateInteractionError(interaction, `${interaction.guild.name} doesn't have any ${ActionTypeName[type].toLowerCase()} action IDs that exist. To view inactive action IDs, make sure \`is_inactive\` option is toggle to \`true\`.`);
 
     const embed_one = new EmbedBuilder()
     .setThumbnail(interaction.guild.iconURL({ forceStatic: false, size: 4096 }))

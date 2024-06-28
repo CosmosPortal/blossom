@@ -1,5 +1,7 @@
+import { RoleManager } from "../Entities";
+import { FindOrCreateEntity } from "../Functions";
 import type { APIEmbed } from "discord-api-types/v10";
-import type { ContextMenuCommandInteraction, RepliableInteraction } from "discord.js";
+import type { ContextMenuCommandInteraction, Guild, RepliableInteraction, User } from "discord.js";
 
 export class Blossom {
     /**
@@ -28,6 +30,30 @@ export class Blossom {
      */
     public static DefaultHex(): number {
         return 0xFFB7C5;
+    };
+
+    /**
+     * Checks if a user is a guild staff member
+     * @param {Guild} guild - Your guild class to gather information
+     * @param {User} user - Your user class to gather information
+     * 
+     * @example
+     * ```ts
+     * const is_staff = await Blossom.IsGuildStaffMember(interaction.guild, interaction.user);
+     * ```
+     */
+    public static async IsGuildStaffMember(guild: Guild, user: User): Promise<boolean> {
+        const member = await guild.members.fetch(user.id).catch(() => { return undefined });
+        if (!member) return false;
+
+        const member_roles = member.roles.cache.map((role) => role.id);
+        const role_manager = await FindOrCreateEntity(RoleManager, { Snowflake: guild.id });
+        const guild_owner = role_manager.StaffTeamGuildOwner.split(", ");
+        const guild_manager = role_manager.StaffTeamGuildManager.split(", ");
+        const guild_moderator = role_manager.StaffTeamGuildModerator.split(", ");
+        const staff_team_roles = guild_owner.concat(guild_manager, guild_moderator);
+
+        return member.id === guild.ownerId || member_roles.some((role) => staff_team_roles.includes(role));
     };
 
     /**

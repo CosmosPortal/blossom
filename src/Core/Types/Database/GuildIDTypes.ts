@@ -1,1 +1,1 @@
-export type GuildIDTypes = "InfractionCreation";
+export type GuildIDTypes = "InfractionCreation" | "ReportCreation";

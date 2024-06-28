@@ -1,6 +1,6 @@
-import type { FindOneOptions, ObjectType } from "typeorm";
 import { Database } from "../../Classes";
 import { DatabaseConnect } from "./DatabaseConnect";
+import type { FindOneOptions, ObjectType } from "typeorm";
 
 /**
  * Finds one entity
@@ -9,7 +9,7 @@ import { DatabaseConnect } from "./DatabaseConnect";
  * 
  * @example
  * ```ts
- * const guild_role = await FindOneEntity(GuildRole, { Snowflake: interaction.guild.id });
+ * const role_manager = await FindOneEntity(RoleManager, { Snowflake: interaction.guild.id });
  * ```
  */
 export async function FindOneEntity<T>(entity: ObjectType<T>, criteria: FindOneOptions<T>["where"]): Promise<T | null> {

@@ -22,7 +22,7 @@ export class InfractionSystem {
     EvidenceAttachmentURL!: string;
 
     @Column()
-    InfractionGuildID!: string;
+    Guild_ID!: string;
 
     @Column()
     Reason!: string;

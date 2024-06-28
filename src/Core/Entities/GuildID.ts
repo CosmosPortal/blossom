@@ -7,4 +7,7 @@ export class GuildID {
 
     @Column({ default: 0 })
     InfractionCreation!: number;
+
+    @Column({ default: 0 })
+    ReportCreation!: number;
 };

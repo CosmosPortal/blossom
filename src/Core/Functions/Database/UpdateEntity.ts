@@ -1,7 +1,7 @@
-import type { FindOneOptions, ObjectType } from "typeorm";
-import type { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
 import { Database } from "../../Classes";
 import { DatabaseConnect } from "./DatabaseConnect";
+import type { FindOneOptions, ObjectType } from "typeorm";
+import type { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
 
 /**
  * Updates an entity with the given data
@@ -11,7 +11,7 @@ import { DatabaseConnect } from "./DatabaseConnect";
  * 
  * @example
  * ```ts
- * await UpdateEntity(GuildRole, { Snowflake: interaction.guild.id }, { StaffTeamGuildOwner: interaction.values[0] });
+ * await UpdateEntity(RoleManager, { Snowflake: guild.id }, { StaffTeamGuildOwner: interaction.values[0] });
  * ```
  */
 export async function UpdateEntity<T>(entity: ObjectType<T>, criteria: FindOneOptions<T>["where"], partial_entity: QueryDeepPartialEntity<T>): Promise<void> {

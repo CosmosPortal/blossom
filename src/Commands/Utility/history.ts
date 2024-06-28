@@ -1,6 +1,6 @@
 import { ButtonBuilder, ChatInputCommandBuilder, StringSelectMenuBuilder } from "@cosmosportal/blossom.utils";
 import { ApplicationCommandOptionType, ButtonStyle, EmbedBuilder } from "discord.js";
-import { ActionType, Blossom, FormatMemberInfractions, Sentry, type InfractionType } from "../../Core";
+import { ActionTypeName, Blossom, FormatInfraction, Sentry, type InfractionType } from "../../Core";
 import type { CommandData, SlashCommandProps } from "commandkit";
 
 export const data: CommandData = new ChatInputCommandBuilder({
@@ -12,13 +12,14 @@ export const data: CommandData = new ChatInputCommandBuilder({
             description: "The type of infraction to view",
             type: ApplicationCommandOptionType.String,
             choices: [
-                { name: "BanAdd", value: "BanAdd" },
-                { name: "BanRemove", value: "BanRemove" },
-                { name: "BanSoft", value: "BanSoft" },
+                { name: "Ban Add", value: "BanAdd" },
+                { name: "Ban Remove", value: "BanRemove" },
+                { name: "Ban Soft", value: "BanSoft" },
                 { name: "Kick", value: "Kick" },
-                { name: "TimeoutAdd", value: "TimeoutAdd" },
-                { name: "TimeoutRemove", value: "TimeoutRemove" },
-                { name: "WarnAdd", value: "WarnAdd" }
+                { name: "Timeout Add", value: "TimeoutAdd" },
+                { name: "Timeout Remove", value: "TimeoutRemove" },
+                { name: "Verbal Warn", value: "WarnVerbal" },
+                { name: "Warn Add", value: "WarnAdd" }
             ],
             required: true
         },
@@ -105,26 +106,34 @@ export async function run({ client, handler, interaction }: SlashCommandProps): 
     }).BuildActionRow();
 
     if (user.id === interaction.user.id) {
-        const infraction_history = await FormatMemberInfractions(interaction.guild.id, user.id, interaction.options.getString("type", true) as InfractionType, interaction.options.getBoolean("is_inactive", false) ?? false);
-        if (!infraction_history) return void await Blossom.CreateInteractionError(interaction, `You don't have any ${ActionType[interaction.options.getString("type", true) as InfractionType].toLowerCase()} action IDs that exist. To view inactive action IDs, make sure \`is_inactive\` option is toggle to \`true\`. To view another user action IDs, make sure to mention/enter user ID in the \`user\` option.`);
+        const infractions = await FormatInfraction(interaction.guild.id, {
+            from_member: user.id,
+            is_inactive: interaction.options.getBoolean("is_inactive", false) ?? false,
+            type: interaction.options.getString("type", true) as InfractionType
+        })
+        if (!infractions) return void await Blossom.CreateInteractionError(interaction, `You don't have any ${ActionTypeName[interaction.options.getString("type", true) as InfractionType].toLowerCase()} action IDs that exist. To view inactive action IDs, make sure \`is_inactive\` option is toggle to \`true\`. To view another user action IDs, make sure to mention/enter user ID in the \`user\` option.`);
 
         const embed_one = new EmbedBuilder()
         .setThumbnail(user.displayAvatarURL({ forceStatic: false, size: 4096 }))
-        .setDescription(infraction_history)
+        .setDescription(infractions)
         .setColor(Blossom.DefaultHex());
 
         return void await interaction.followUp({ embeds: [embed_one], components: [action_row_one, action_row_two], ephemeral: true });
     };
 
     if (user.id !== interaction.user.id) {
-        if (!await Sentry.BlossomGuildModerationAuthorization(interaction.guild, interaction.member)) return void await Blossom.CreateInteractionError(interaction, `</${interaction.commandName}:${interaction.commandId}> \`user\` option is restricted to members of the Moderation Team in ${interaction.guild.name}.`);
+        if (!await Sentry.HasModerationAuthorization(interaction.guild, interaction.member)) return void await Blossom.CreateInteractionError(interaction, `</${interaction.commandName}:${interaction.commandId}> \`user\` option is restricted to members of the Moderation Team in ${interaction.guild.name}.`);
 
-        const infraction_history = await FormatMemberInfractions(interaction.guild.id, user.id, interaction.options.getString("type", true) as InfractionType, interaction.options.getBoolean("is_inactive", false) ?? false);
-        if (!infraction_history) return void await Blossom.CreateInteractionError(interaction, `You don't have any ${ActionType[interaction.options.getString("type", true) as InfractionType].toLowerCase()} action IDs that exist. To view inactive action IDs, make sure \`is_inactive\` option is toggle to \`true\`. To view another user action IDs, make sure to mention/enter user ID in the \`user\` option.`);
+        const infractions = await FormatInfraction(interaction.guild.id, {
+            from_member: user.id,
+            is_inactive: interaction.options.getBoolean("is_inactive", false) ?? false,
+            type: interaction.options.getString("type", true) as InfractionType
+        });
+        if (!infractions) return void await Blossom.CreateInteractionError(interaction, `You don't have any ${ActionTypeName[interaction.options.getString("type", true) as InfractionType].toLowerCase()} action IDs that exist. To view inactive action IDs, make sure \`is_inactive\` option is toggle to \`true\`. To view another user action IDs, make sure to mention/enter user ID in the \`user\` option.`);
 
         const embed_one = new EmbedBuilder()
         .setThumbnail(user.displayAvatarURL({ forceStatic: false, size: 4096 }))
-        .setDescription(infraction_history)
+        .setDescription(infractions)
         .setColor(Blossom.DefaultHex());
 
         return void await interaction.followUp({ embeds: [embed_one], components: [action_row_one, action_row_two], ephemeral: true });

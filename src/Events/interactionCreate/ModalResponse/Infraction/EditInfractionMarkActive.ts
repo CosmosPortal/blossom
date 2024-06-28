@@ -7,22 +7,22 @@ export default async function (interaction: ModalSubmitInteraction, client: Clie
     if (await Sentry.MaintenanceModeStatus(client, interaction.user.id) && await Sentry.MaintenanceModeStatus(client, interaction.guild.id)) return void await Blossom.CreateInteractionError(interaction, "The developers are currently performing scheduled maintenance. Sorry for any inconvenience.");
     if (!await Sentry.IsAuthorized(interaction.guild.id)) return void await Blossom.CreateInteractionError(interaction, `${interaction.guild.name} is unauthorized to use ${client.user.username}.`);
     if (!await Sentry.IsAuthorized(interaction.user.id)) return void await Blossom.CreateInteractionError(interaction, `You are unauthorized to use ${client.user.username}.`);
-    if (!await Sentry.BlossomGuildManagementAuthorization(interaction.guild, interaction.member)) return void await Blossom.CreateInteractionError(interaction, `This feature is restricted to members of the Management Team in ${interaction.guild.name}.`);
+    if (!await Sentry.HasManagementAuthorization(interaction.guild, interaction.member)) return void await Blossom.CreateInteractionError(interaction, `This feature is restricted to members of the Management Team in ${interaction.guild.name}.`);
 
     await interaction.deferReply({ ephemeral: true });
 
     const custom_id = interaction.customId.split("_")[1];
-    const infraction = await FindOneEntity(InfractionSystem, { ActionID: custom_id, InfractionGuildID: interaction.guild.id });
+    const infraction = await FindOneEntity(InfractionSystem, { ActionID: custom_id, Guild_ID: interaction.guild.id });
     if (!infraction) return void await Blossom.CreateInteractionError(interaction, `The action ID you entered doesn't exist in ${interaction.guild.name}.`);
     if (infraction.Active) return void await Blossom.CreateInteractionError(interaction, "You cannot mark the aciton ID as active due to it being active already.");
     if (infraction.Type === "WarnAdd") await UpdateMemberID(`${interaction.user.id}_${interaction.guild.id}`, "WarnInfraction");
-    await UpdateEntity(InfractionSystem, { ActionID: custom_id, InfractionGuildID: interaction.guild.id }, {
+    await UpdateEntity(InfractionSystem, { ActionID: custom_id, Guild_ID: interaction.guild.id }, {
         Active: true,
         RemovalReason: "",
         RemovalStaffID: "",
         RemovalStaffUsername: ""
     });
-    const refresh_infraction = await FindOneEntity(InfractionSystem, { ActionID: custom_id, InfractionGuildID: interaction.guild.id }) as InfractionSystem;
+    const refresh_infraction = await FindOneEntity(InfractionSystem, { ActionID: custom_id, Guild_ID: interaction.guild.id }) as InfractionSystem;
 
     const infraction_message = new InfractionMessage({
         client: client,

@@ -1,10 +1,31 @@
-import type { Client, Guild, GuildMember } from "discord.js";
-import type { Snowflake } from "../Types";
-import { AccountSecurity, Developer, GuildRole } from "../Entities";
+import { AccountSecurity, Developer, RoleManager } from "../Entities";
 import { AuthorizationLevel } from "../Enums";
 import { FindOrCreateEntity } from "../Functions";
+import type { Client, Guild, GuildMember } from "discord.js";
+import type { Snowflake } from "../Types";
 
 export class Sentry {
+    /**
+     * Checks if a member is able to edit Blossom's guild settings
+     * @param {Guild} guild - Your guild class to gather information
+     * @param {GuildMember} member - Your guild member class to gather information
+     * 
+     * @example
+     * ```ts
+     * await Sentry.HasGuildSettingAuthorization(guild, member);
+     * ```
+     */
+    public static async HasGuildSettingAuthorization(guild: Guild, member: GuildMember): Promise<boolean> {
+        const member_roles = member.roles.cache.map((role) => role.id);
+        const role_manager = await FindOrCreateEntity(RoleManager, { Snowflake: guild.id });
+        const guild_owner = role_manager.StaffTeamGuildOwner.split(", ");
+        const guild_manager = role_manager.StaffTeamGuildManager.split(", ");
+        const guild_application_manager = role_manager.StaffTeamGuildAppManager.split(", ");
+        const staff_team_roles = guild_owner.concat(guild_manager, guild_application_manager);
+
+        return member.id === guild.ownerId || member_roles.some((role) => staff_team_roles.includes(role));
+    };
+
     /**
      * Checks if a member is able to use Blossom management commands
      * @param {Guild} guild - Your guild class to gather information
@@ -12,14 +33,14 @@ export class Sentry {
      * 
      * @example
      * ```ts
-     * await Sentry.BlossomGuildManagementAuthorization(interaction.guild, interaction.member);
+     * await Sentry.HasManagementAuthorization(guild, member);
      * ```
      */
-    public static async BlossomGuildManagementAuthorization(guild: Guild, member: GuildMember): Promise<boolean> {
+    public static async HasManagementAuthorization(guild: Guild, member: GuildMember): Promise<boolean> {
         const member_roles = member.roles.cache.map((role) => role.id);
-        const guild_role = await FindOrCreateEntity(GuildRole, { Snowflake: guild.id });
-        const guild_owner = guild_role.StaffTeamGuildOwner.split(", ");
-        const guild_manager = guild_role.StaffTeamGuildManager.split(", ");
+        const role_manager = await FindOrCreateEntity(RoleManager, { Snowflake: guild.id });
+        const guild_owner = role_manager.StaffTeamGuildOwner.split(", ");
+        const guild_manager = role_manager.StaffTeamGuildManager.split(", ");
         const staff_team_roles = guild_owner.concat(guild_manager);
 
         return member.id === guild.ownerId || member_roles.some((role) => staff_team_roles.includes(role));
@@ -32,37 +53,16 @@ export class Sentry {
      * 
      * @example
      * ```ts
-     * await Sentry.BlossomGuildModerationAuthorization(interaction.guild, interaction.member);
+     * await Sentry.HasModerationAuthorization(guild, member);
      * ```
      */
-    public static async BlossomGuildModerationAuthorization(guild: Guild, member: GuildMember): Promise<boolean> {
+    public static async HasModerationAuthorization(guild: Guild, member: GuildMember): Promise<boolean> {
         const member_roles = member.roles.cache.map((role) => role.id);
-        const guild_role = await FindOrCreateEntity(GuildRole, { Snowflake: guild.id });
-        const guild_owner = guild_role.StaffTeamGuildOwner.split(", ");
-        const guild_manager = guild_role.StaffTeamGuildManager.split(", ");
-        const guild_moderator = guild_role.StaffTeamGuildModerator.split(", ");
+        const role_manager = await FindOrCreateEntity(RoleManager, { Snowflake: guild.id });
+        const guild_owner = role_manager.StaffTeamGuildOwner.split(", ");
+        const guild_manager = role_manager.StaffTeamGuildManager.split(", ");
+        const guild_moderator = role_manager.StaffTeamGuildModerator.split(", ");
         const staff_team_roles = guild_owner.concat(guild_manager, guild_moderator);
-
-        return member.id === guild.ownerId || member_roles.some((role) => staff_team_roles.includes(role));
-    };
-
-    /**
-     * Checks if a member is able to edit Blossom's guild settings
-     * @param {Guild} guild - Your guild class to gather information
-     * @param {GuildMember} member - Your guild member class to gather information
-     * 
-     * @example
-     * ```ts
-     * await Sentry.BlossomGuildSettingAuthorization(interaction.guild, interaction.member);
-     * ```
-     */
-    public static async BlossomGuildSettingAuthorization(guild: Guild, member: GuildMember): Promise<boolean> {
-        const member_roles = member.roles.cache.map((role) => role.id);
-        const guild_role = await FindOrCreateEntity(GuildRole, { Snowflake: guild.id });
-        const guild_owner = guild_role.StaffTeamGuildOwner.split(", ");
-        const guild_manager = guild_role.StaffTeamGuildManager.split(", ");
-        const guild_application_manager = guild_role.StaffTeamGuildAppManager.split(", ");
-        const staff_team_roles = guild_owner.concat(guild_manager, guild_application_manager);
 
         return member.id === guild.ownerId || member_roles.some((role) => staff_team_roles.includes(role));
     };
@@ -73,7 +73,7 @@ export class Sentry {
      * 
      * @example
      * ```ts
-     * await Sentry.IsAuthorized(interaction.guild.id);
+     * await Sentry.IsAuthorized(guild.id);
      * ```
      */
     public static async IsAuthorized(snowflake: Snowflake): Promise<boolean> {
@@ -89,7 +89,7 @@ export class Sentry {
      * 
      * @example
      * ```ts
-     * await Sentry.MaintenanceModeStatus(client, interaction.user.id);
+     * await Sentry.MaintenanceModeStatus(client, user.id);
      * ```
      */
     public static async MaintenanceModeStatus(client: Client<true>, snowflake?: Snowflake): Promise<boolean> {

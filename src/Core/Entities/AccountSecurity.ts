@@ -10,4 +10,13 @@ export class AccountSecurity {
 
     @Column({ default: 1 })
     AuthorizationLevel!: number;
+
+    @Column({ default: false })
+    MemberAgreementPrivacyPolicy!: boolean;
+
+    @Column({ default: false })
+    MemberAgreementTermsofService!: boolean;
+
+    @Column({ default: true })
+    NewMemberAgreement!: boolean;
 };

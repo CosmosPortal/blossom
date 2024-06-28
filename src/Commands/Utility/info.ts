@@ -1,6 +1,6 @@
 import { ChatInputCommandBuilder, GuildChannelCount, MemberBannedStatus } from "@cosmosportal/blossom.utils";
 import { ApplicationCommandOptionType, ChannelType, EmbedBuilder } from "discord.js";
-import { Blossom, DiscordBadges, FindOrCreateEntity, FormatTime, GuildID, GuildModerationSetting, GuildRole, MemberID, Sentry } from "../../Core";
+import { AppealSetting, Blossom, DiscordBadges, FindOrCreateEntity, FormatTime, GuildID, MemberID, ModerationSetting, RoleManager, Sentry } from "../../Core";
 import type { CommandData, SlashCommandProps } from "commandkit";
 
 export const data: CommandData = new ChatInputCommandBuilder({
@@ -45,15 +45,16 @@ export async function run({ client, handler, interaction }: SlashCommandProps): 
             };
         });
 
-        const guild_moderation_setting = await FindOrCreateEntity(GuildModerationSetting, { Snowflake: interaction.guild.id });
+        const appeal_setting = await FindOrCreateEntity(AppealSetting, { Snowflake: interaction.guild.id });
         const guild_id = await FindOrCreateEntity(GuildID, { Snowflake: interaction.guild.id });
+        const moderation_setting = await FindOrCreateEntity(ModerationSetting, { Snowflake: interaction.guild.id });
 
         const embed_one = new EmbedBuilder()
         .setThumbnail(interaction.guild.iconURL({ forceStatic: false, size: 4096 }))
         .setFields(
             { name: "General Information", value: `- **Name**\n - ${interaction.guild.name}\n - ${interaction.guild.id}\n- **Description**\n> ${!interaction.guild.description ? "No server description" : interaction.guild.description}\n- **Owner**\n - ${guild_owner.user.tag}\n - ${interaction.guild.ownerId}\n- **Creation** • <t:${Math.trunc(Math.floor(interaction.guild.createdTimestamp / 1000))}:D>` },
             { name: "Miscellaneous Information", value: `- **Channel [${await GuildChannelCount(interaction.guild, [ ChannelType.AnnouncementThread, ChannelType.GuildAnnouncement, ChannelType.GuildForum, ChannelType.GuildMedia, ChannelType.GuildStageVoice, ChannelType.GuildText, ChannelType.GuildVoice, ChannelType.PrivateThread, ChannelType.PublicThread ])}]**\n - **Text** • ${await GuildChannelCount(interaction.guild, [ ChannelType.GuildAnnouncement, ChannelType.GuildForum, ChannelType.GuildText ])}\n - **Thread** • ${await GuildChannelCount(interaction.guild, [ ChannelType.AnnouncementThread, ChannelType.PrivateThread, ChannelType.PublicThread ])}\n - **Voice** • ${await GuildChannelCount(interaction.guild, [ ChannelType.GuildStageVoice, ChannelType.GuildVoice ])}\n- **Member** • ${interaction.guild.memberCount.toLocaleString()}\n- **Roles** • ${interaction.guild.roles.cache.size}` },
-            { name: `${client.user.username} Information`, value: `${guild_moderation_setting.AppealLinkStatus && guild_moderation_setting.AppealLink ? `- **Appeal** • [View Link](${guild_moderation_setting.AppealLink} 'Appeal Link')\n` : ""}- **Default Timeout Timer** • ${FormatTime(guild_moderation_setting.TimeoutTimer, ", ")}\n- **Case Created** • ${guild_id.InfractionCreation.toLocaleString()} Cases\n- **Moderation Reason Required?** • ${guild_moderation_setting.RequireReason ? "Yes" : "No"}` }
+            { name: `${client.user.username} Information`, value: `${appeal_setting.AppealLinkStatus && appeal_setting.AppealLink ? `- **Appeal** • [View Link](${appeal_setting.AppealLink} 'Appeal Link')\n` : ""}- **Default Timeout Timer** • ${FormatTime(moderation_setting.TimeoutTimer, ", ")}\n- **Case Created** • ${guild_id.InfractionCreation.toLocaleString()} Cases\n- **Moderation Reason Required?** • ${moderation_setting.RequireReason ? "Yes" : "No"}` }
         )
         .setImage(interaction.guild.bannerURL({ forceStatic: false, size: 4096 }))
         .setColor(Blossom.DefaultHex());
@@ -66,6 +67,7 @@ export async function run({ client, handler, interaction }: SlashCommandProps): 
 
         let user_badges = user.flags?.toArray().map((flag) => DiscordBadges[flag as keyof typeof DiscordBadges]).filter((x) => x !== undefined);
         if (!user_badges || user_badges.length === 0) user_badges = [ DiscordBadges.None ];
+        if (!user.bannerURL()) await user.fetch(true);
 
         const member = await interaction.guild.members.fetch(user.id).catch(() => { return undefined });
         const member_id = await FindOrCreateEntity(MemberID, { Snowflake: `${user.id}_${interaction.guild.id}` })
@@ -90,9 +92,9 @@ export async function run({ client, handler, interaction }: SlashCommandProps): 
             }
             else display_roles = member_roles;
 
-            const guild_role = await FindOrCreateEntity(GuildRole, { Snowflake: interaction.guild.id });
+            const role_manager = await FindOrCreateEntity(RoleManager, { Snowflake: interaction.guild.id });
             const roles = member.roles.cache.map((role) => role.id);
-            const member_rank = user.id === interaction.guild.ownerId ? "Owner" : !!roles.includes(guild_role.StaffTeamGuildOwner) ? "Owner" : !!roles.includes(guild_role.StaffTeamGuildAppManager) ? "Application Manager" : !!roles.includes(guild_role.StaffTeamGuildManager) ? "Server Manager" : !!roles.includes(guild_role.StaffTeamGuildModerator) ? "Moderator" : "Member";
+            const member_rank = user.id === interaction.guild.ownerId ? "Owner" : !!roles.includes(role_manager.StaffTeamGuildOwner) ? "Owner" : !!roles.includes(role_manager.StaffTeamGuildAppManager) ? "Application Manager" : !!roles.includes(role_manager.StaffTeamGuildManager) ? "Server Manager" : !!roles.includes(role_manager.StaffTeamGuildModerator) ? "Moderator" : "Member";
 
             embed_one.setFields(
                 { name: "General Information", value: `- **Name** [\`${member.displayName}\`]\n - **Username** • ${user.tag}\n - **ID** • ${user.id}\n- **Creation** • <t:${Math.trunc(Math.floor(user.createdTimestamp / 1000))}:D>\n- **Joined** • <t:${Math.trunc(Math.floor(Number(member.joinedTimestamp) / 1000))}:D>\n- **Badges** • ${user_badges.join(" ")}` },

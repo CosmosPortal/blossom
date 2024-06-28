@@ -1,6 +1,6 @@
 import { ButtonBuilder, StringSelectMenuBuilder } from "@cosmosportal/blossom.utils";
 import { ButtonStyle, EmbedBuilder, type Client, type MessageComponentInteraction } from "discord.js";
-import { ActionType, Blossom, FormatMemberInfractions, Sentry, type InfractionType } from "../../../../Core";
+import { ActionTypeName, Blossom, FormatInfraction, Sentry, type InfractionType } from "../../../../Core";
 import type { CommandKit } from "commandkit";
 
 export default async function (interaction: MessageComponentInteraction, client: Client<true>, handler: CommandKit): Promise<undefined> {
@@ -17,7 +17,7 @@ export default async function (interaction: MessageComponentInteraction, client:
     const is_inactive = custom_id[3] === "true" ? false : true;
 
     if (!user) return void await Blossom.CreateInteractionError(interaction, `An issue occured with fetching the user. The user either no longer exist or ${client.user.username} couldn't fetch the user.`);
-    if (interaction.user.id !== user.id && !await Sentry.BlossomGuildModerationAuthorization(interaction.guild, interaction.member)) return void await Blossom.CreateInteractionError(interaction, `This feature is restricted to members of the Moderation Team in ${interaction.guild.name}.`);
+    if (interaction.user.id !== user.id && !await Sentry.HasModerationAuthorization(interaction.guild, interaction.member)) return void await Blossom.CreateInteractionError(interaction, `This feature is restricted to members of the Moderation Team in ${interaction.guild.name}.`);
 
     const action_row_one = new ButtonBuilder()
     .CreateRegularButton({
@@ -40,17 +40,17 @@ export default async function (interaction: MessageComponentInteraction, client:
         custom_id: `ViewInfractionHistoryType_${user.id}_${is_inactive}`,
         select_options: [
             {
-                label: "BanAdd",
+                label: "Ban Add",
                 value: "BanAdd",
                 default: type === "BanAdd"
             },
             {
-                label: "BanRemove",
+                label: "Ban Remove",
                 value: "BanRemove",
                 default: type === "BanRemove"
             },
             {
-                label: "BanSoft",
+                label: "Ban Soft",
                 value: "BanSoft",
                 default: type === "BanSoft"
             },
@@ -60,17 +60,22 @@ export default async function (interaction: MessageComponentInteraction, client:
                 default: type === "Kick"
             },
             {
-                label: "TimeoutAdd",
+                label: "Timeout Add",
                 value: "TimeoutAdd",
                 default: type === "TimeoutAdd"
             },
             {
-                label: "TimeoutRemove",
+                label: "Timeout Remove",
                 value: "TimeoutRemove",
                 default: type === "TimeoutRemove"
             },
             {
-                label: "WarnAdd",
+                label: "Verbal Warn",
+                value: "WarnVerbal",
+                default: type === "WarnVerbal"
+            },
+            {
+                label: "Warn Add",
                 value: "WarnAdd",
                 default: type === "WarnAdd"
             }
@@ -78,8 +83,12 @@ export default async function (interaction: MessageComponentInteraction, client:
         placeholder: "Infraction Types"
     }).BuildActionRow();
 
-    const infraction_history = await FormatMemberInfractions(interaction.guild.id, user.id, type, is_inactive);
-    if (!infraction_history) return void await Blossom.CreateInteractionError(interaction, `The user doesn't have any ${ActionType[type].toLowerCase()} action IDs that exist.`);
+    const infraction_history = await FormatInfraction(interaction.guild.id, {
+        from_member: user.id,
+        is_inactive: is_inactive,
+        type: type
+    });
+    if (!infraction_history) return void await Blossom.CreateInteractionError(interaction, `The user doesn't have any ${ActionTypeName[type].toLowerCase()} action IDs that exist.`);
 
     const embed_one = new EmbedBuilder()
     .setThumbnail(user.displayAvatarURL({ forceStatic: false, size: 4096 }))

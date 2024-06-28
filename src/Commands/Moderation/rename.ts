@@ -1,6 +1,6 @@
 import { ChatInputCommandBuilder, CompareRolePosition, MemberHasPermissions } from "@cosmosportal/blossom.utils";
 import { ApplicationCommandOptionType, PermissionsBitField } from "discord.js";
-import { Blossom, FindOrCreateEntity, GuildModerationSetting, Sentry } from "../../Core";
+import { Blossom, FindOrCreateEntity, ModerationSetting, Sentry } from "../../Core";
 import type { CommandData, SlashCommandProps } from "commandkit";
 
 export const data: CommandData = new ChatInputCommandBuilder({
@@ -36,15 +36,15 @@ export async function run({ client, handler, interaction }: SlashCommandProps): 
     if (await Sentry.MaintenanceModeStatus(client, interaction.user.id) && await Sentry.MaintenanceModeStatus(client, interaction.guild.id)) return void await Blossom.CreateInteractionError(interaction, "The developers are currently performing scheduled maintenance. Sorry for any inconvenience.");
     if (!await Sentry.IsAuthorized(interaction.guild.id)) return void await Blossom.CreateInteractionError(interaction, `${interaction.guild.name} is unauthorized to use ${client.user.username}.`);
     if (!await Sentry.IsAuthorized(interaction.user.id)) return void await Blossom.CreateInteractionError(interaction, `You are unauthorized to use ${client.user.username}.`);
-    if (!await Sentry.BlossomGuildModerationAuthorization(interaction.guild, interaction.member)) return void await Blossom.CreateInteractionError(interaction, `</${interaction.commandName}:${interaction.commandId}> is restricted to members of the Moderation Team in ${interaction.guild.name}.`);
+    if (!await Sentry.HasModerationAuthorization(interaction.guild, interaction.member)) return void await Blossom.CreateInteractionError(interaction, `</${interaction.commandName}:${interaction.commandId}> is restricted to members of the Moderation Team in ${interaction.guild.name}.`);
 
-    const guild_moderation_setting = await FindOrCreateEntity(GuildModerationSetting, { Snowflake: interaction.guild.id });
+    const moderation_setting = await FindOrCreateEntity(ModerationSetting, { Snowflake: interaction.guild.id });
     const member = interaction.options.getMember("member");
     const reason = interaction.options.getString("reason", false);
 
     await interaction.deferReply({ ephemeral: true });
 
-    if (guild_moderation_setting.RequireReason === true && !reason) return void await Blossom.CreateInteractionError(interaction, `${interaction.guild.name} requires you to enter a reason for </${interaction.commandName}:${interaction.commandId}>. Use the \`reason\` option in </${interaction.commandName}:${interaction.commandId}>.`);
+    if (moderation_setting.RequireReason && !reason) return void await Blossom.CreateInteractionError(interaction, `${interaction.guild.name} requires you to enter a reason for </${interaction.commandName}:${interaction.commandId}>. Use the \`reason\` option in </${interaction.commandName}:${interaction.commandId}>.`);
     if (!member) return void await Blossom.CreateInteractionError(interaction, `The member you entered is no longer a member of ${interaction.guild.name}.`);
     if (!await MemberHasPermissions(interaction.guild, client.user.id, [ PermissionsBitField.Flags.ManageNicknames ])) return void await Blossom.CreateInteractionError(interaction, `${client.user.username} doesn't have enough permission to run </${interaction.commandName}:${interaction.commandId}>. Ensure ${client.user.username} has **Manage Nicknames** permission in ${interaction.guild.name}.`);
     if (member.id === interaction.user.id) return void await Blossom.CreateInteractionError(interaction, `You cannot run </${interaction.commandName}:${interaction.commandId}> on yourself.`);

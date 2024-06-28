@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { CommandKit } from "commandkit";
 import { Client, GatewayIntentBits, Partials } from "discord.js";
-import * as path from "path";
+import * as path from "node:path";
 
 const client = new Client<true>({
     intents: [ GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessages, GatewayIntentBits.Guilds, GatewayIntentBits.MessageContent ],
@@ -12,9 +12,7 @@ const client = new Client<true>({
 new CommandKit({
     client,
     commandsPath: path.join(__dirname, "Commands"),
-    eventsPath: path.join(__dirname, "Events"),
-    devGuildIds: [ "1052139816499814471", "1136563432443875338" ],
-    devUserIds: [ "515989471645401088" ],
+    eventsPath: path.join(__dirname, "Events")
 });
 
 client.login(process.env.CLIENT_TOKEN);

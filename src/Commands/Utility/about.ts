@@ -30,7 +30,12 @@ export async function run({ client, handler, interaction }: SlashCommandProps): 
         label: "Community Server"
     })
     .CreateLinkButton({
-        custom_id: "https://github.com/CosmosPortal",
+        custom_id: "https://discord.gg/wtHFmdvGVC",
+        style: ButtonStyle.Link,
+        label: "Support Server"
+    })
+    .CreateLinkButton({
+        custom_id: "https://github.com/CosmosPortal/blossom#readme",
         style: ButtonStyle.Link,
         label: "Documentation"
     }).BuildActionRow();

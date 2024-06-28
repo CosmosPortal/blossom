@@ -8,5 +8,5 @@ export async function DatabaseConnect(): Promise<void> {
 
     await Connect();
 
-    if (!Database.isInitialized) await Connect();
+    if (!Database.isInitialized) throw new Error("[Database Connection Error] | Could not connect to TypeORM");
 };

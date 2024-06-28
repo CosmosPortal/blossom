@@ -1,6 +1,6 @@
-import type { DeepPartial, FindOneOptions, ObjectType } from "typeorm";
 import { Database } from "../../Classes";
 import { DatabaseConnect } from "./DatabaseConnect";
+import type { DeepPartial, FindOneOptions, ObjectType } from "typeorm";
 
 /**
  * Finds one entity, if entity is not found, creates it
@@ -9,7 +9,7 @@ import { DatabaseConnect } from "./DatabaseConnect";
  * 
  * @example
  * ```ts
- * const guild_role = await FindOrCreateEntity(GuildRole, { Snowflake: interaction.guild.id });
+ * const role_manager = await FindOrCreateEntity(RoleManager, { Snowflake: interaction.guild.id });
  * ```
  */
 export async function FindOrCreateEntity<T>(entity: ObjectType<T>, criteria: FindOneOptions<T>["where"]): Promise<T> {

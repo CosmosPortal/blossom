@@ -1,7 +1,7 @@
 import { ChatInputCommandBuilder, CompareRolePosition, MemberBannedStatus, MemberHasPermissions } from "@cosmosportal/blossom.utils";
 import { ApplicationCommandOptionType, PermissionsBitField } from "discord.js";
 import { setTimeout } from "timers/promises";
-import { Blossom, CreateInfraction, FindOrCreateEntity, GuildModerationSetting, InfractionMessage, Sentry, UpdateGuildID } from "../../Core";
+import { Blossom, CreateActionID, CreateInfraction, FindOrCreateEntity, InfractionMessage, ModerationSetting, Sentry, UpdateGuildID } from "../../Core";
 import custom_moderation_reason from "../../Core/JSON/CustomModerationReason.json";
 import type { AutocompleteProps, CommandData, SlashCommandProps } from "commandkit";
 
@@ -79,15 +79,15 @@ export async function run({ client, handler, interaction }: SlashCommandProps): 
     if (await Sentry.MaintenanceModeStatus(client, interaction.user.id) && await Sentry.MaintenanceModeStatus(client, interaction.guild.id)) return void await Blossom.CreateInteractionError(interaction, "The developers are currently performing scheduled maintenance. Sorry for any inconvenience.");
     if (!await Sentry.IsAuthorized(interaction.guild.id)) return void await Blossom.CreateInteractionError(interaction, `${interaction.guild.name} is unauthorized to use ${client.user.username}.`);
     if (!await Sentry.IsAuthorized(interaction.user.id)) return void await Blossom.CreateInteractionError(interaction, `You are unauthorized to use ${client.user.username}.`);
-    if (!await Sentry.BlossomGuildModerationAuthorization(interaction.guild, interaction.member)) return void await Blossom.CreateInteractionError(interaction, `</${interaction.commandName} ${interaction.options.getSubcommand()}:${interaction.commandId}> is restricted to members of the Moderation Team in ${interaction.guild.name}.`);
+    if (!await Sentry.HasModerationAuthorization(interaction.guild, interaction.member)) return void await Blossom.CreateInteractionError(interaction, `</${interaction.commandName} ${interaction.options.getSubcommand()}:${interaction.commandId}> is restricted to members of the Moderation Team in ${interaction.guild.name}.`);
 
-    const guild_moderation_setting = await FindOrCreateEntity(GuildModerationSetting, { Snowflake: interaction.guild.id });
+    const moderation_setting = await FindOrCreateEntity(ModerationSetting, { Snowflake: interaction.guild.id });
     const user = interaction.options.getUser("user", true);
     const reason = interaction.options.getString("reason", false);
 
     await interaction.deferReply({ ephemeral: true });
 
-    if (guild_moderation_setting.RequireReason === true && !reason) return void await Blossom.CreateInteractionError(interaction, `${interaction.guild.name} requires you to enter a reason for </${interaction.commandName} ${interaction.options.getSubcommand()}:${interaction.commandId}>. Use the \`reason\` option in </${interaction.commandName} ${interaction.options.getSubcommand()}:${interaction.commandId}>.`);
+    if (moderation_setting.RequireReason && !reason) return void await Blossom.CreateInteractionError(interaction, `${interaction.guild.name} requires you to enter a reason for </${interaction.commandName} ${interaction.options.getSubcommand()}:${interaction.commandId}>. Use the \`reason\` option in </${interaction.commandName} ${interaction.options.getSubcommand()}:${interaction.commandId}>.`);
     if (!await MemberHasPermissions(interaction.guild, client.user.id, [ PermissionsBitField.Flags.BanMembers ])) return void await Blossom.CreateInteractionError(interaction, `${client.user.username} doesn't have enough permission to run </${interaction.commandName} ${interaction.options.getSubcommand()}:${interaction.commandId}>. Ensure ${client.user.username} has **Ban Members** permission in ${interaction.guild.name}.`);
     if (user.id === interaction.user.id) return void await Blossom.CreateInteractionError(interaction, `You cannot run </${interaction.commandName} ${interaction.options.getSubcommand()}:${interaction.commandId}> on yourself.`);
     if (user.id === client.user.id) return void await Blossom.CreateInteractionError(interaction, `You cannot run </${interaction.commandName} ${interaction.options.getSubcommand()}:${interaction.commandId}> on ${client.user.username}.`);
@@ -98,10 +98,10 @@ export async function run({ client, handler, interaction }: SlashCommandProps): 
     if (interaction.options.getSubcommand() === "add") {
         if (await MemberBannedStatus(interaction.guild, user.id)) return void await Blossom.CreateInteractionError(interaction, `The user you entered is already banned in ${interaction.guild.name}.`);
 
-        const delete_messages = interaction.options.getInteger("delete_messages", false) ?? guild_moderation_setting.BanDeleteMessagesHistory;
+        const delete_messages = interaction.options.getInteger("delete_messages", false) ?? moderation_setting.BanDeleteMessagesHistory;
         const case_id = await UpdateGuildID(interaction.guild.id, "InfractionCreation");
         const creation_timestamp = Date.now();
-        const action_id = `${creation_timestamp}${new Date(creation_timestamp).getFullYear()}${new Date(creation_timestamp).getDate()}${new Date(creation_timestamp).getMonth() + 1}`;
+        const action_id = CreateActionID(creation_timestamp);
         const infraction = await CreateInfraction({
             Snowflake: interaction.guild.id,
             ActionID: action_id,
@@ -148,7 +148,7 @@ export async function run({ client, handler, interaction }: SlashCommandProps): 
 
         const case_id = await UpdateGuildID(interaction.guild.id, "InfractionCreation");
         const creation_timestamp = Date.now();
-        const action_id = `${creation_timestamp}${new Date(creation_timestamp).getFullYear()}${new Date(creation_timestamp).getDate()}${new Date(creation_timestamp).getMonth() + 1}`;
+        const action_id = CreateActionID(creation_timestamp);
         const infraction = await CreateInfraction({
             Snowflake: interaction.guild.id,
             ActionID: action_id,
@@ -187,15 +187,18 @@ export async function run({ client, handler, interaction }: SlashCommandProps): 
 };
 
 export function autocomplete({ client, handler, interaction }: AutocompleteProps): undefined {
-    if (interaction.options.getSubcommand() === "remove") return;
-    const focused = interaction.options.getFocused();
-    const filter_choices = custom_moderation_reason.filter((custom_reason) => custom_reason.reason.toLowerCase().startsWith(focused.toLowerCase()));
-    const result = filter_choices.map((choice) => {
-        return {
-            name: `${choice.id} | ${choice.reason}`,
-            value: choice.reason
-        };
-    });
+    if (!interaction.inCachedGuild() || !interaction.isAutocomplete()) return;
 
-    return void interaction.respond(result.slice(0, 25)).catch(() => {});
+    if (interaction.options.getSubcommand() === "add") {
+        const focused = interaction.options.getFocused();
+        const filter_choices = custom_moderation_reason.filter((custom_reason) => custom_reason.reason.toLowerCase().startsWith(focused.toLowerCase()));
+        const result = filter_choices.map((choice) => {
+            return {
+                name: `${choice.id} | ${choice.reason}`,
+                value: choice.reason
+            };
+        });
+
+        return void interaction.respond(result.slice(0, 25)).catch(() => {});
+    };
 };
