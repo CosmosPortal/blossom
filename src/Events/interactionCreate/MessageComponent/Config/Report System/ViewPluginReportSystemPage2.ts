@@ -30,7 +30,7 @@ export default async function (interaction: MessageComponentInteraction, client:
         custom_id: "undefined",
         style: ButtonStyle.Primary,
         disabled: true,
-        label: "1/2"
+        label: "2/2"
     })
     .CreateRegularButton({
         custom_id: "ViewPluginReportSystemPage2",

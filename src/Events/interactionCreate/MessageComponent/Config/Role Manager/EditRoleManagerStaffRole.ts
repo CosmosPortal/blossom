@@ -4,7 +4,7 @@ import { Blossom, FindOrCreateEntity, RoleManager, RoleTypeName, Sentry, UpdateE
 import type { CommandKit } from "commandkit";
 
 export default async function (interaction: MessageComponentInteraction, client: Client<true>, handler: CommandKit): Promise<undefined> {
-    if (!interaction.inCachedGuild() || !interaction.isRoleSelectMenu() || !interaction.customId.startsWith("EditGuildRoleStaffRoles")) return;
+    if (!interaction.inCachedGuild() || !interaction.isRoleSelectMenu() || !interaction.customId.startsWith("EditRoleManagerStaffRole")) return;
     if (await Sentry.MaintenanceModeStatus(client, interaction.user.id) && await Sentry.MaintenanceModeStatus(client, interaction.guild.id)) return void await Blossom.CreateInteractionError(interaction, "The developers are currently performing scheduled maintenance. Sorry for any inconvenience.");
     if (!await Sentry.IsAuthorized(interaction.guild.id)) return void await Blossom.CreateInteractionError(interaction, `${interaction.guild.name} is unauthorized to use ${client.user.username}.`);
     if (!await Sentry.IsAuthorized(interaction.user.id)) return void await Blossom.CreateInteractionError(interaction, `You are unauthorized to use ${client.user.username}.`);

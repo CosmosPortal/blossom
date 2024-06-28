@@ -72,7 +72,7 @@ export default async function (interaction: MessageComponentInteraction, client:
         label: "Exit"
     })
     .CreateRegularButton({
-        custom_id: "ViewPluginSetting",
+        custom_id: "ViewPluginHome",
         style: ButtonStyle.Secondary,
         label: "Home"
     })
