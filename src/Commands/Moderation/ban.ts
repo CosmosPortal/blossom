@@ -1,7 +1,7 @@
 import { ChatInputCommandBuilder, CompareRolePosition, MemberBannedStatus, MemberHasPermissions } from "@cosmosportal/blossom.utils";
 import { ApplicationCommandOptionType, PermissionsBitField } from "discord.js";
 import { setTimeout } from "timers/promises";
-import { Blossom, CreateActionID, CreateInfraction, FindOrCreateEntity, InfractionMessage, ModerationSetting, Sentry, UpdateGuildID } from "../../Core";
+import { Blossom, CreateInfraction, FindOrCreateEntity, InfractionMessage, ModerationSetting, Sentry, UpdateGuildID } from "../../Core";
 import custom_moderation_reason from "../../Core/JSON/CustomModerationReason.json";
 import type { AutocompleteProps, CommandData, SlashCommandProps } from "commandkit";
 
@@ -101,22 +101,17 @@ export async function run({ client, handler, interaction }: SlashCommandProps): 
         const delete_messages = interaction.options.getInteger("delete_messages", false) ?? moderation_setting.BanDeleteMessagesHistory;
         const case_id = await UpdateGuildID(interaction.guild.id, "InfractionCreation");
         const creation_timestamp = Date.now();
-        const action_id = CreateActionID(creation_timestamp);
         const infraction = await CreateInfraction({
             Snowflake: interaction.guild.id,
-            ActionID: action_id,
             Active: true,
             CaseID: case_id,
-            CreationTimestamp: `${creation_timestamp}`,
+            CreationTimestamp: creation_timestamp,
             EvidenceAttachmentURL: "",
             Reason: reason ?? `No reason was provided for the ${interaction.options.getBoolean("soft_ban", false) ? "soft " : ""}ban by ${interaction.user.tag}`,
             RemovalReason: "",
             RemovalStaffID: "",
-            RemovalStaffUsername: "",
             StaffID: interaction.user.id,
-            StaffUsername: interaction.user.tag,
             TargetID: user.id,
-            TargetUsername: user.tag,
             Type: interaction.options.getBoolean("soft_ban", false) ? "BanSoft" : "BanAdd"
         });
 
@@ -148,22 +143,16 @@ export async function run({ client, handler, interaction }: SlashCommandProps): 
 
         const case_id = await UpdateGuildID(interaction.guild.id, "InfractionCreation");
         const creation_timestamp = Date.now();
-        const action_id = CreateActionID(creation_timestamp);
         const infraction = await CreateInfraction({
             Snowflake: interaction.guild.id,
-            ActionID: action_id,
-            Active: true,
             CaseID: case_id,
-            CreationTimestamp: `${creation_timestamp}`,
+            CreationTimestamp: creation_timestamp,
             EvidenceAttachmentURL: "",
             Reason: reason ?? `No reason was provided for the ban removal by ${interaction.user.tag}`,
             RemovalReason: "",
             RemovalStaffID: "",
-            RemovalStaffUsername: "",
             StaffID: interaction.user.id,
-            StaffUsername: interaction.user.tag,
             TargetID: user.id,
-            TargetUsername: user.tag,
             Type: "BanRemove"
         });
 

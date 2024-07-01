@@ -1,5 +1,5 @@
 import { AttachmentBuilder, type Client, type MessageComponentInteraction } from "discord.js";
-import { ActionTypeName, Blossom, FindInfraction, FindOrCreateEntity, GuildID, Sentry, type InfractionSystem, type InfractionType } from "../../../../Core";
+import { ActionName, Blossom, FindInfraction, FindOrCreateEntity, GuildID, Sentry, type InfractionSystem, type InfractionType } from "../../../../Core";
 import type { CommandKit } from "commandkit";
 
 export default async function (interaction: MessageComponentInteraction, client: Client<true>, handler: CommandKit): Promise<undefined> {
@@ -19,11 +19,11 @@ export default async function (interaction: MessageComponentInteraction, client:
         is_inactive: true,
         type: type
     }) as InfractionSystem[] | null;
-    if (!infractions) return void await Blossom.CreateInteractionError(interaction, `${interaction.guild.name} doesn't have any ${ActionTypeName[type].toLowerCase()} action IDs that exist.`);
+    if (!infractions) return void await Blossom.CreateInteractionError(interaction, `${interaction.guild.name} doesn't have any ${ActionName[type].toLowerCase()} infraction IDs that exist.`);
 
     const data = infractions.map((infraction) => {
         return {
-            actionID: infraction.ActionID,
+            infractionID: infraction.BlossomID,
             active: infraction.Active,
             caseID: String(infraction.CaseID),
             creationTimestamp: infraction.CreationTimestamp,
@@ -31,11 +31,8 @@ export default async function (interaction: MessageComponentInteraction, client:
             reason: infraction.Reason,
             removalReason: infraction.RemovalReason ? infraction.RemovalReason : null,
             removalStaffID: "anonymous",
-            removalStaffUsername: "anonymous",
             staffID: "anonymous",
-            staffUsername: "anonymous",
             targetID: infraction.TargetID,
-            targetUsername: infraction.TargetUsername,
             type: infraction.Type
         }
     });

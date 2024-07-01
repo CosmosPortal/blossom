@@ -2,7 +2,7 @@ import { HasChannelPermissions, WebhookExist } from "@cosmosportal/blossom.utils
 import { PermissionsBitField } from "discord.js";
 import { UpdateEntity } from "../Database";
 import { LoggingSetting } from "../../Entities";
-import { ManageWebhooksData, ManageWebhooksOutput } from "../../Interfaces";
+import type { ManageWebhooksData, ManageWebhooksOutput } from "../../Interfaces";
 
 /**
  * Manages the client's webhooks for a guild

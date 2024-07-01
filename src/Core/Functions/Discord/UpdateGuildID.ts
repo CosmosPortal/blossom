@@ -10,7 +10,7 @@ import type { GuildIDTypes, Snowflake } from "../../Types";
  * 
  * @example
  * ```ts
- * const total_infractions = await UpdateGuildID(guild.id, "InfractionCreation");
+ * console.log(await UpdateGuildID(guild.id, "InfractionCreation"));
  * ```
  */
 export async function UpdateGuildID(snowflake: Snowflake, type: GuildIDTypes): Promise<number> {

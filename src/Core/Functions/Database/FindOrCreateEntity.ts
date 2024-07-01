@@ -9,7 +9,7 @@ import type { DeepPartial, FindOneOptions, ObjectType } from "typeorm";
  * 
  * @example
  * ```ts
- * const role_manager = await FindOrCreateEntity(RoleManager, { Snowflake: interaction.guild.id });
+ * console.log(await FindOrCreateEntity(RoleManager, { Snowflake: guild.id }));
  * ```
  */
 export async function FindOrCreateEntity<T>(entity: ObjectType<T>, criteria: FindOneOptions<T>["where"]): Promise<T> {

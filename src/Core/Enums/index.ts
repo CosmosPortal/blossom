@@ -1,5 +1,5 @@
-export * from "./ActionTypeName";
+export * from "./ActionName";
 export * from "./AuthorizationLevel";
 export * from "./Color";
 export * from "./DiscordBadges";
-export * from "./RoleTypeName";
+export * from "./RoleName";

@@ -1,10 +1,10 @@
-import type { ActionID, InfractionType, Snowflake } from "../Types";
+import type { BlossomID, InfractionType, Snowflake } from "../Types";
 
 export interface FormatInfractionData {
     /**
-     * The action ID to look for
+     * The Blossom ID to look for
      */
-    action_id?: ActionID;
+    blossom_id?: BlossomID;
     /**
      * The member the infraction belongs to
      */

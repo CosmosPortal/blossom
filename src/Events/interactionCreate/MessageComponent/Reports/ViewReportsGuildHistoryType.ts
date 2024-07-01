@@ -1,6 +1,6 @@
 import { ButtonBuilder, StringSelectMenuBuilder } from "@cosmosportal/blossom.utils";
 import { ButtonStyle, EmbedBuilder, type Client, type MessageComponentInteraction } from "discord.js";
-import { ActionTypeName, Blossom, FormatReport, Sentry, type ReportType } from "../../../../Core";
+import { ActionName, Blossom, FormatReport, Sentry, type ReportType } from "../../../../Core";
 import type { CommandKit } from "commandkit";
 
 export default async function (interaction: MessageComponentInteraction, client: Client<true>, handler: CommandKit): Promise<undefined> {
@@ -54,7 +54,7 @@ export default async function (interaction: MessageComponentInteraction, client:
         is_inactive: is_inactive,
         type: type
     });
-    if (!reports) return void await Blossom.CreateInteractionError(interaction, `${interaction.guild.name} doesn't have any ${ActionTypeName[type].toLowerCase()} action IDs that exist. To view inactive action IDs, make sure \`is_inactive\` option is toggle to \`true\`.`);
+    if (!reports) return void await Blossom.CreateInteractionError(interaction, `${interaction.guild.name} doesn't have any ${ActionName[type].toLowerCase()} action IDs that exist. To view inactive action IDs, make sure \`is_inactive\` option is toggle to \`true\`.`);
 
     const embed_one = new EmbedBuilder()
     .setThumbnail(interaction.guild.iconURL({ forceStatic: false, size: 4096 }))

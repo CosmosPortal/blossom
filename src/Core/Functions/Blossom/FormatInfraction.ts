@@ -15,7 +15,7 @@ import type { Snowflake } from "../../Types";
  */
 export async function FormatInfraction(guild_id: Snowflake, data: FormatInfractionData = {}): Promise<string | undefined> {
     const infractions = await FindInfraction(guild_id, {
-        action_id: data.action_id,
+        blossom_id: data.blossom_id,
         from_member: data.from_member,
         is_inactive: data.is_inactive,
         type: data.type
@@ -26,8 +26,8 @@ export async function FormatInfraction(guild_id: Snowflake, data: FormatInfracti
     let char_count = 0;
 
     for (const infraction of infractions) {
-        const { ActionID, Active, CreationTimestamp } = infraction;
-        const infraction_format = `${Active ? "[`Active`]" : "[`Inactive`]"} | \`${ActionID}\` • <t:${Math.trunc(Math.floor(Number(CreationTimestamp) / 1000))}:D>\n`;
+        const { BlossomID, Active, CreationTimestamp } = infraction;
+        const infraction_format = `${Active ? "[`Active`]" : "[`Inactive`]"} | \`${BlossomID}\` • <t:${Math.trunc(Math.floor(CreationTimestamp / 1000))}:D>\n`;
 
         if (char_count + infraction_format.length) {
             format += infraction_format;

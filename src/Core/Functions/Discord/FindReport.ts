@@ -21,7 +21,7 @@ export async function FindReport(guild_id: Snowflake, data: FindReportData = {})
     .leftJoinAndSelect("ReportSystem.Guild", "Guild")
     .where("ReportSystem.Guild_ID = :Guild_ID", { Guild_ID: guild_id })
 
-    if (data.action_id) infractions = infractions.andWhere("ReportSystem.ActionID = :ActionID", { ActionID: data.action_id });
+    if (data.blossom_id) infractions = infractions.andWhere("ReportSystem.BlossomID = :BlossomID", { BlossomID: data.blossom_id });
     if (data.from_member) infractions = infractions.andWhere("ReportSystem.ReporterID = :ReporterID", { ReporterID: data.from_member });
     if (!data.is_inactive) infractions = infractions.andWhere("ReportSystem.Active = :Active", { Active: true });
     if (data.type) infractions = infractions.andWhere("ReportSystem.Type = :Type", { Type: data.type });

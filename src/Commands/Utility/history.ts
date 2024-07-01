@@ -1,6 +1,6 @@
 import { ButtonBuilder, ChatInputCommandBuilder, StringSelectMenuBuilder } from "@cosmosportal/blossom.utils";
 import { ApplicationCommandOptionType, ButtonStyle, EmbedBuilder } from "discord.js";
-import { ActionTypeName, Blossom, FormatInfraction, Sentry, type InfractionType } from "../../Core";
+import { ActionName, Blossom, FormatInfraction, Sentry, type InfractionType } from "../../Core";
 import type { CommandData, SlashCommandProps } from "commandkit";
 
 export const data: CommandData = new ChatInputCommandBuilder({
@@ -111,7 +111,7 @@ export async function run({ client, handler, interaction }: SlashCommandProps): 
             is_inactive: interaction.options.getBoolean("is_inactive", false) ?? false,
             type: interaction.options.getString("type", true) as InfractionType
         })
-        if (!infractions) return void await Blossom.CreateInteractionError(interaction, `You don't have any ${ActionTypeName[interaction.options.getString("type", true) as InfractionType].toLowerCase()} action IDs that exist. To view inactive action IDs, make sure \`is_inactive\` option is toggle to \`true\`. To view another user action IDs, make sure to mention/enter user ID in the \`user\` option.`);
+        if (!infractions) return void await Blossom.CreateInteractionError(interaction, `You don't have any ${ActionName[interaction.options.getString("type", true) as InfractionType].toLowerCase()} infraction IDs that exist. To view inactive infraction IDs, make sure \`is_inactive\` option is toggle to \`true\`. To view another user infraction IDs, make sure to mention/enter user ID in the \`user\` option.`);
 
         const embed_one = new EmbedBuilder()
         .setThumbnail(user.displayAvatarURL({ forceStatic: false, size: 4096 }))
@@ -129,7 +129,7 @@ export async function run({ client, handler, interaction }: SlashCommandProps): 
             is_inactive: interaction.options.getBoolean("is_inactive", false) ?? false,
             type: interaction.options.getString("type", true) as InfractionType
         });
-        if (!infractions) return void await Blossom.CreateInteractionError(interaction, `You don't have any ${ActionTypeName[interaction.options.getString("type", true) as InfractionType].toLowerCase()} action IDs that exist. To view inactive action IDs, make sure \`is_inactive\` option is toggle to \`true\`. To view another user action IDs, make sure to mention/enter user ID in the \`user\` option.`);
+        if (!infractions) return void await Blossom.CreateInteractionError(interaction, `The user you entered doesn't have any ${ActionName[interaction.options.getString("type", true) as InfractionType].toLowerCase()} infraction IDs that exist. To view inactive infraction IDs, make sure \`is_inactive\` option is toggle to \`true\`.`);
 
         const embed_one = new EmbedBuilder()
         .setThumbnail(user.displayAvatarURL({ forceStatic: false, size: 4096 }))

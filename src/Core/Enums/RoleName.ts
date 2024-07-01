@@ -1,4 +1,4 @@
-export enum RoleTypeName {
+export enum RoleName {
     /**
      * The "Owner" roles of the server
      */

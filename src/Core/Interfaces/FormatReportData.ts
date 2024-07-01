@@ -1,10 +1,10 @@
-import type { ActionID, ReportType, Snowflake } from "../Types";
+import type { BlossomID, ReportType, Snowflake } from "../Types";
 
 export interface FormatReportData {
     /**
-     * The action ID to look for
+     * The Blossom ID to look for
      */
-    action_id?: ActionID;
+    blossom_id?: BlossomID;
     /**
      * The member who created the report
      */

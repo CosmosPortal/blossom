@@ -12,17 +12,16 @@ export default async function (interaction: ModalSubmitInteraction, client: Clie
     await interaction.deferReply({ ephemeral: true });
 
     const custom_id = interaction.customId.split("_")[1];
-    const infraction = await FindOneEntity(InfractionSystem, { ActionID: custom_id, Guild_ID: interaction.guild.id });
-    if (!infraction) return void await Blossom.CreateInteractionError(interaction, `The action ID you entered doesn't exist in ${interaction.guild.name}.`);
-    if (infraction.Active) return void await Blossom.CreateInteractionError(interaction, "You cannot mark the aciton ID as active due to it being active already.");
+    const infraction = await FindOneEntity(InfractionSystem, { BlossomID: custom_id, Guild_ID: interaction.guild.id });
+    if (!infraction) return void await Blossom.CreateInteractionError(interaction, `The infraction ID you entered doesn't exist in ${interaction.guild.name}.`);
+    if (infraction.Active) return void await Blossom.CreateInteractionError(interaction, "You cannot mark the infraction ID as active due to it being active already.");
     if (infraction.Type === "WarnAdd") await UpdateMemberID(`${interaction.user.id}_${interaction.guild.id}`, "WarnInfraction");
-    await UpdateEntity(InfractionSystem, { ActionID: custom_id, Guild_ID: interaction.guild.id }, {
+    await UpdateEntity(InfractionSystem, { BlossomID: custom_id, Guild_ID: interaction.guild.id }, {
         Active: true,
         RemovalReason: "",
-        RemovalStaffID: "",
-        RemovalStaffUsername: ""
+        RemovalStaffID: ""
     });
-    const refresh_infraction = await FindOneEntity(InfractionSystem, { ActionID: custom_id, Guild_ID: interaction.guild.id }) as InfractionSystem;
+    const refresh_infraction = await FindOneEntity(InfractionSystem, { BlossomID: custom_id, Guild_ID: interaction.guild.id }) as InfractionSystem;
 
     const infraction_message = new InfractionMessage({
         client: client,
@@ -38,5 +37,5 @@ export default async function (interaction: ModalSubmitInteraction, client: Clie
     await infraction_message.SendModifiedWebhook("Private");
     await infraction_message.SendModifiedWebhook("Public");
 
-    return void await interaction.followUp({ content: `Action ID [\`${custom_id}\`] has been marked as active in **${interaction.guild.name}**!`, ephemeral: true });
+    return void await interaction.followUp({ content: `The infraction ID [\`${custom_id}\`] has been marked as active in **${interaction.guild.name}**!`, ephemeral: true });
 };

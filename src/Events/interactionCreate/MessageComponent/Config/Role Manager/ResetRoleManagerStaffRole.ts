@@ -1,6 +1,6 @@
 import { ButtonBuilder, RoleSelectMenuBuilder } from "@cosmosportal/blossom.utils";
 import { ButtonStyle, EmbedBuilder, type Client, type MessageComponentInteraction } from "discord.js";
-import { Blossom, FindOrCreateEntity, RoleManager, RoleTypeName, Sentry, UpdateEntity } from "../../../../../Core";
+import { Blossom, FindOrCreateEntity, RoleManager, RoleName, Sentry, UpdateEntity } from "../../../../../Core";
 import type { CommandKit } from "commandkit";
 
 export default async function (interaction: MessageComponentInteraction, client: Client<true>, handler: CommandKit): Promise<undefined> {
@@ -20,13 +20,13 @@ export default async function (interaction: MessageComponentInteraction, client:
     const guild_staff_roles = role_manager[`StaffTeam${custom_id[1]}` as keyof RoleManager].split(", ").filter((x) => guild_roles.includes(x)).map((x) => `<@&${x}>`);
 
     const embed_one = new EmbedBuilder()
-    .setDescription(`## Overview\n### ${RoleTypeName[custom_id[1] as keyof typeof RoleTypeName]}\n${role_manager[`StaffTeam${custom_id[1]}` as keyof RoleManager] === "0" || guild_staff_roles.length === 0 ? "Add Roles?" : guild_staff_roles.join(" | ")}`)
+    .setDescription(`## Overview\n### ${RoleName[custom_id[1] as keyof typeof RoleName]}\n${role_manager[`StaffTeam${custom_id[1]}` as keyof RoleManager] === "0" || guild_staff_roles.length === 0 ? "Add Roles?" : guild_staff_roles.join(" | ")}`)
     .setColor(Blossom.DefaultHex());
 
     const action_row_one = new RoleSelectMenuBuilder({
         custom_id: `EditRoleManagerStaffRole_${custom_id[1]}`,
         max_values: 5,
-        placeholder: `Select roles for ${RoleTypeName[custom_id[1] as keyof typeof RoleTypeName].toLowerCase()}`
+        placeholder: `Select roles for ${RoleName[custom_id[1] as keyof typeof RoleName].toLowerCase()}`
     }).BuildActionRow();
 
     const action_row_two = new ButtonBuilder()

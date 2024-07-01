@@ -1,6 +1,6 @@
 import { ButtonBuilder, ChatInputCommandBuilder, CompareRolePosition, HasChannelPermissions } from "@cosmosportal/blossom.utils";
 import { ApplicationCommandOptionType, ButtonStyle, ChannelType, EmbedBuilder, PermissionsBitField, type TextChannel } from "discord.js";
-import { ActionTypeName, Blossom, CreateActionID, CreateReport, FindOrCreateEntity, ReportSetting, ReportSystem, ReportType, RoleManager, Sentry, UpdateEntity, UpdateGuildID } from "../../Core";
+import { ActionName, Blossom, CreateReport, FindOrCreateEntity, ReportSetting, ReportSystem, ReportType, RoleManager, Sentry, UpdateEntity, UpdateGuildID } from "../../Core";
 import custom_moderation_reason from "../../Core/JSON/CustomModerationReason.json";
 import type { AutocompleteProps, CommandData, SlashCommandProps } from "commandkit";
 
@@ -53,41 +53,30 @@ export async function run({ client, handler, interaction }: SlashCommandProps): 
 
     const case_id = await UpdateGuildID(interaction.guild.id, "ReportCreation");
     const creation_timestamp = Date.now();
-    const action_id = CreateActionID(creation_timestamp);
     const report = await CreateReport({
         Snowflake: interaction.guild.id,
-        ActionID: action_id,
-        Active: true,
         CaseID: case_id,
-        CreationTimestamp: String(creation_timestamp),
+        CreationTimestamp: creation_timestamp,
         EvidenceAttachmentURL: "",
         FlaggedChannelID: "",
         FlaggedMessageID: "",
-        HasBanAddLogged: false,
-        HasKickLogged: false,
-        HasTimeoutAddLogged: false,
-        HasWarnAddLogged: false,
-        HasWarnVerbalLogged: false,
-        IsMessageDeleted: false,
         Reason: reason,
         ReportChannelID: "",
         ReporterID: interaction.user.id,
-        ReporterUsername: interaction.user.tag,
         ReportMessageID: "",
         TargetID: user.id,
-        TargetUsername: user.tag,
         Type: "UserReport"
     });
 
     const embed_one = new EmbedBuilder()
     .setThumbnail(user.displayAvatarURL({ forceStatic: false, size: 4096 }))
-    .setAuthor({ name: `Case #${report.CaseID} | ${ActionTypeName[report.Type as ReportType]}` })
+    .setAuthor({ name: `Case #${report.CaseID} | ${ActionName[report.Type as ReportType]}` })
     .setDescription(`<@${user.id}> has been reported by <@${interaction.user.id}>.\n- **Reported User** • ${user.tag} [\`${user.id}\`]\n- **Report Creation** • <t:${Math.trunc(Math.floor(creation_timestamp / 1000))}:D>`)
     .addFields(
         { name: "Reason", value: reason },
         { name: "Action Log", value: `None` }
     )
-    .setFooter({ text: `Report ID • ${action_id} | Reported by ${interaction.user.tag}` })
+    .setFooter({ text: `Report ID • ${report.BlossomID} | Reported by ${interaction.user.tag}` })
     .setColor(Blossom.DefaultHex());
 
     const action_row_one = new ButtonBuilder()
@@ -138,15 +127,15 @@ export async function run({ client, handler, interaction }: SlashCommandProps): 
 
     if (report_setting.UserReportThreadMode) {
         const report_thread = await report_channel.threads.create({
-            name: `Case #${report.CaseID} | ${ActionTypeName[report.Type as ReportType]}`,
-            reason: `Creating ${ActionTypeName[report.Type as ReportType]} Case #${report.CaseID}`,
+            name: `Case #${report.CaseID} | ${ActionName[report.Type as ReportType]}`,
+            reason: `Creating ${ActionName[report.Type as ReportType]} Case #${report.CaseID}`,
             type: ChannelType.PrivateThread
         });
 
         const report_message = await report_thread.send({ content: !report_setting.UserReportNotifiedStaffTeam || guild_owner.length === 0 ? "" : staff_team_roles.join(" | "), embeds: [embed_one], components: [action_row_one, action_row_two], allowedMentions: { parse: [ "roles" ] } });
 
         await UpdateEntity(ReportSystem, {
-            ActionID: action_id,
+            BlossomID: report.BlossomID,
             Guild_ID: interaction.guild.id,
             TargetID: user.id
         }, {
@@ -158,7 +147,7 @@ export async function run({ client, handler, interaction }: SlashCommandProps): 
         const report_message = await report_channel.send({ content: !report_setting.UserReportNotifiedStaffTeam || guild_owner.length === 0 ? "" : staff_team_roles.join(" | "), embeds: [embed_one], components: [action_row_one, action_row_two], allowedMentions: { parse: [ "roles" ] } });
 
         await UpdateEntity(ReportSystem, {
-            ActionID: action_id,
+            BlossomID: report.BlossomID,
             Guild_ID: interaction.guild.id,
             TargetID: user.id
         }, {

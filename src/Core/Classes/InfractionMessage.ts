@@ -1,8 +1,8 @@
-import { ButtonBuilder, GuildChannelExist, HasChannelPermissions, WebhookExist } from "@cosmosportal/blossom.utils";
+import { ButtonBuilder, FormatTime, GuildChannelExist, HasChannelPermissions, WebhookExist } from "@cosmosportal/blossom.utils";
 import { ButtonStyle, EmbedBuilder, PermissionsBitField, WebhookClient, type APIMessage, type Channel, type Message, type NewsChannel, type TextChannel } from "discord.js";
 import { AppealSetting, LoggingSetting } from "../Entities";
-import { ActionTypeName, Color } from "../Enums";
-import { FindOrCreateEntity, FormatTime, ManageWebhooks } from "../Functions";
+import { ActionName, Color } from "../Enums";
+import { FindOrCreateEntity, ManageWebhooks } from "../Functions";
 import type { InfractionMessageData } from "../Interfaces";
 import type { InfractionType } from "../Types";
 
@@ -14,7 +14,7 @@ export class InfractionMessage {
      * ```ts
      * const infraction_message = new InfractionMessage({
      *     client: client,
-     *     guild: interaction.guild,
+     *     guild: guild,
      *     infraction: infraction_system,
      *     type: "BanAdd"
      * });
@@ -30,7 +30,7 @@ export class InfractionMessage {
      * 
      * @example
      * ```ts
-     * await infraction_message.ConfirmationMessage(interaction.channel);
+     * await infraction_message.ConfirmationMessage(channel);
      * ```
      */
     public async ConfirmationMessage(channel: Channel | null): Promise<Message<true> | undefined> {
@@ -55,10 +55,10 @@ export class InfractionMessage {
 
         const embed_one = new EmbedBuilder()
         .setThumbnail(user.displayAvatarURL({ forceStatic: false, size: 4096 }))
-        .setAuthor({ name: `Case #${this._data.infraction.CaseID} | ${ActionTypeName[this._data.type]}` })
+        .setAuthor({ name: `Case #${this._data.infraction.CaseID} | ${ActionName[this._data.type]}` })
         .setDescription(description[this._data.type])
         .setFields(
-            { name: "Moderation Information", value: `- **Action ID** • ${this._data.infraction.ActionID}${this._data.duration ? `\n- **Duration** • ${FormatTime(this._data.duration, ", ")}` : ""}` },
+            { name: "Moderation Information", value: `- **Infraction ID** • ${this._data.infraction.BlossomID}${this._data.duration ? `\n- **Duration** • ${FormatTime(this._data.duration, ", ")}` : ""}` },
             { name: "Reason", value: this._data.infraction.RemovalReason ? this._data.infraction.RemovalReason : this._data.infraction.Reason }
         )
         .setColor(Color[this._data.type]);
@@ -102,9 +102,9 @@ export class InfractionMessage {
 
         const embed_one = new EmbedBuilder()
         .setThumbnail(user.displayAvatarURL({ forceStatic: false, size: 4096 }))
-        .setAuthor({ name: `Case #${this._data.infraction.CaseID} | ${ActionTypeName[this._data.type]}` })
+        .setAuthor({ name: `Case #${this._data.infraction.CaseID} | ${ActionName[this._data.type]}` })
         .addFields(
-            { name: "Moderation Information", value: `- **Action ID** • ${this._data.infraction.ActionID}\n- **Creation** • <t:${Math.trunc(Math.floor(Number(this._data.infraction.CreationTimestamp) / 1000))}:D>\n${this._data.duration ? `- **Duration** • ${FormatTime(this._data.duration, ", ")}\n` : ""}- **Status** • ${this._data.infraction.Active == true ? "Active" : "Inactive"}` },
+            { name: "Moderation Information", value: `- **Infraction ID** • ${this._data.infraction.BlossomID}\n- **Creation** • <t:${Math.trunc(Math.floor(this._data.infraction.CreationTimestamp / 1000))}:D>\n${this._data.duration ? `- **Duration** • ${FormatTime(this._data.duration, ", ")}\n` : ""}- **Status** • ${this._data.infraction.Active == true ? "Active" : "Inactive"}` },
             { name: "Reason", value: this._data.type === "WarnRemove" && this._data.infraction.RemovalReason ? this._data.infraction.RemovalReason : this._data.infraction.Reason }
         )
         .setColor(Color[this._data.type])
@@ -155,6 +155,9 @@ export class InfractionMessage {
             if (await HasChannelPermissions(this._data.client, old_webhook.channelId, this._data.client.user.id, [ PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.ManageWebhooks ])) old_webhook.delete(`Deleting ${this._data.client.user.username} old moderation log webhook`);
         };
 
+        const staff = await this._data.client.users.fetch(this._data.infraction.StaffID).catch(() => { return undefined });
+        const removal_staff = await this._data.client.users.fetch(this._data.infraction.RemovalStaffID).catch(() => { return undefined });
+
         const log_webhook = await ManageWebhooks({
             client: this._data.client,
             guild: this._data.guild,
@@ -165,7 +168,7 @@ export class InfractionMessage {
         });
 
         const fields = [
-            { name: "Moderation Information", value: `- **Action ID** • ${this._data.infraction.ActionID}\n- **Creation** • <t:${Math.trunc(Math.floor(Number(this._data.infraction.CreationTimestamp) / 1000))}:D>\n- **Status** • ${this._data.infraction.Active == true ? "Active" : "Inactive"}\n- **Staff Member** • ${this._data.infraction.StaffUsername} [\`${this._data.infraction.StaffID}\`]\n- **Target Member** • ${this._data.infraction.TargetUsername} [\`${this._data.infraction.TargetID}\`]` }
+            { name: "Moderation Information", value: `- **Infraction ID** • ${this._data.infraction.BlossomID}\n- **Creation** • <t:${Math.trunc(Math.floor(this._data.infraction.CreationTimestamp / 1000))}:D>\n- **Status** • ${this._data.infraction.Active == true ? "Active" : "Inactive"}\n- **Staff Member** • ${staff?.tag ?? "unknown"} [\`${this._data.infraction.StaffID}\`]\n- **Target Member** • ${user.tag} [\`${this._data.infraction.TargetID}\`]` }
         ];
 
         if (this._data.modified.type === "MarkActive" && this._data.modified.reason) fields.push(
@@ -175,7 +178,7 @@ export class InfractionMessage {
 
         if (this._data.modified.type === "MarkInactive") fields.push(
             { name: "Reason", value: this._data.infraction.Reason },
-            { name: "Removal Information", value: `- **Staff Member** • ${this._data.infraction.RemovalStaffUsername} [\`${this._data.infraction.RemovalStaffID}\`]` },
+            { name: "Removal Information", value: `- **Staff Member** • ${removal_staff?.tag ?? "unknown"} [\`${this._data.infraction.RemovalStaffID}\`]` },
             { name: "Removal Reason", value: this._data.infraction.RemovalReason }
         );
 
@@ -191,7 +194,7 @@ export class InfractionMessage {
 
         const embed_one = new EmbedBuilder()
         .setThumbnail(user.displayAvatarURL({ forceStatic: false, size: 4096 }))
-        .setAuthor({ name: `Case #${this._data.infraction.CaseID} | ${ActionTypeName[this._data.type]}` })
+        .setAuthor({ name: `Case #${this._data.infraction.CaseID} | ${ActionName[this._data.type]}` })
         .setFields(fields)
         .setColor(Color[this._data.infraction.Type as InfractionType]);
 
@@ -229,6 +232,8 @@ export class InfractionMessage {
             if (await HasChannelPermissions(this._data.client, old_webhook.channelId, this._data.client.user.id, [ PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.ManageWebhooks ])) old_webhook.delete(`Deleting ${this._data.client.user.username} old moderation log webhook`);
         };
 
+        const staff = await this._data.client.users.fetch(this._data.infraction.StaffID).catch(() => { return undefined });
+
         const log_webhook = await ManageWebhooks({
             client: this._data.client,
             guild: this._data.guild,
@@ -240,9 +245,9 @@ export class InfractionMessage {
 
         const embed_one = new EmbedBuilder()
         .setThumbnail(user.displayAvatarURL({ forceStatic: false, size: 4096 }))
-        .setAuthor({ name: `Case #${this._data.infraction.CaseID} | ${ActionTypeName[this._data.type]}` })
+        .setAuthor({ name: `Case #${this._data.infraction.CaseID} | ${ActionName[this._data.type]}` })
         .addFields(
-            { name: "Moderation Information", value: `- **Action ID** • ${this._data.infraction.ActionID}\n- **Creation** • <t:${Math.trunc(Math.floor(Number(this._data.infraction.CreationTimestamp) / 1000))}:D>\n${this._data.duration ? `- **Duration** • ${FormatTime(this._data.duration, ", ")}\n` : ""}- **Status** • ${this._data.infraction.Active == true ? "Active" : "Inactive"}\n- **Staff Member** • ${this._data.infraction.StaffUsername} [\`${this._data.infraction.StaffID}\`]\n- **Target Member** • ${this._data.infraction.TargetUsername} [\`${this._data.infraction.TargetID}\`]` },
+            { name: "Moderation Information", value: `- **Infraction ID** • ${this._data.infraction.BlossomID}\n- **Creation** • <t:${Math.trunc(Math.floor(this._data.infraction.CreationTimestamp / 1000))}:D>\n${this._data.duration ? `- **Duration** • ${FormatTime(this._data.duration, ", ")}\n` : ""}- **Status** • ${this._data.infraction.Active == true ? "Active" : "Inactive"}\n- **Staff Member** • ${staff?.tag ?? "unknown"} [\`${this._data.infraction.StaffID}\`]\n- **Target Member** • ${user.tag} [\`${this._data.infraction.TargetID}\`]` },
             { name: "Reason", value: this._data.type === "WarnRemove" && this._data.infraction.RemovalReason ? this._data.infraction.RemovalReason : this._data.infraction.Reason }
         )
         .setColor(Color[this._data.type]);

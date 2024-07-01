@@ -1,4 +1,4 @@
-import type { ActionID, ReportType, Snowflake } from "../Types";
+import type { BlossomID, ReportType, Snowflake } from "../Types";
 
 export interface ReportCreation {
     /**
@@ -6,63 +6,31 @@ export interface ReportCreation {
      */
     Snowflake: Snowflake;
     /**
-     * The report aciton ID
-     */
-    ActionID: ActionID;
-    /**
-     * Whether the report is active or not
-     */
-    Active: boolean;
-    /**
-     * The report case ID
+     * The report's case ID
      */
     CaseID: number;
     /**
-     * The report creation timestamp
-     */
-    CreationTimestamp: string;
-    /**
-     * The report evidence attachment URL
+     * The report's evidence attachment URL
      */
     EvidenceAttachmentURL: string;
     /**
      * The channel ID the report was made
+     * 
+     * @note Only for "MessageReport" type.
      */
     FlaggedChannelID: Snowflake;
     /**
      * The message ID that was reported
+     * 
+     * @note Only for "MessageReport" type.
      */
     FlaggedMessageID: Snowflake;
-    /**
-     * If the member been banned
-     */
-    HasBanAddLogged: boolean;
-    /**
-     * If the member been kicked
-     */
-    HasKickLogged: boolean;
-    /**
-     * If the member been timed out
-     */
-    HasTimeoutAddLogged: boolean;
-    /**
-     * If the member been given a warning
-     */
-    HasWarnAddLogged: boolean;
-    /**
-     * If the member been given a verbal warning
-     */
-    HasWarnVerbalLogged: boolean;
-    /**
-     * If the reported message has been deleted
-     */
-    IsMessageDeleted: boolean;
     /**
      * The reason for the report creation
      */
     Reason: string;
     /**
-     * The report channel ID
+     * The channel ID the report was sent to
      */
     ReportChannelID: Snowflake;
     /**
@@ -70,11 +38,7 @@ export interface ReportCreation {
      */
     ReporterID: Snowflake;
     /**
-     * The reporter's username
-     */
-    ReporterUsername: string;
-    /**
-     * The report message ID
+     * The message ID of the report sent
      */
     ReportMessageID: Snowflake;
     /**
@@ -82,11 +46,45 @@ export interface ReportCreation {
      */
     TargetID: Snowflake;
     /**
-     * The user's username that is being reported
-     */
-    TargetUsername: string;
-    /**
-     * The report type
+     * The report type to create
      */
     Type: ReportType;
+    /**
+     * Whether the report is active or not
+     */
+    Active?: boolean;
+    /**
+     * The report's Blossom ID
+     */
+    BlossomID?: BlossomID;
+    /**
+     * The report's creation timestamp
+     */
+    CreationTimestamp?: number;
+    /**
+     * If the ban add action been used
+     */
+    HasBanAddLogged?: boolean;
+    /**
+     * If the kick action been used
+     */
+    HasKickLogged?: boolean;
+    /**
+     * If the timeout add action been used
+     */
+    HasTimeoutAddLogged?: boolean;
+    /**
+     * If the warn add action been used
+     */
+    HasWarnAddLogged?: boolean;
+    /**
+     * If the warn verbal action been used
+     */
+    HasWarnVerbalLogged?: boolean;
+    /**
+     * If the delete message action been used
+     * 
+     * @note Only for "MessageReport" type.
+     */
+    IsMessageDeleted?: boolean;
 };

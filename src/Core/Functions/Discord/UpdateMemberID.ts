@@ -11,7 +11,7 @@ import type { MemberIDTypes, Snowflake } from "../../Types";
  * 
  * @example
  * ```ts
- * const warning = await UpdateMemberID(`${user.id}_${guild.id}`, "WarnInfraction", true);
+ * console.log(await UpdateMemberID(`${user.id}_${guild.id}`, "WarnInfraction", true));
  * ```
  */
 export async function UpdateMemberID(snowflake: Snowflake, type: MemberIDTypes, remove: boolean = false): Promise<number> {

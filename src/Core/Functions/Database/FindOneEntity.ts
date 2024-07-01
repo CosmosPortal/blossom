@@ -9,7 +9,7 @@ import type { FindOneOptions, ObjectType } from "typeorm";
  * 
  * @example
  * ```ts
- * const role_manager = await FindOneEntity(RoleManager, { Snowflake: interaction.guild.id });
+ * console.log(await FindOneEntity(RoleManager, { Snowflake: guild.id }));
  * ```
  */
 export async function FindOneEntity<T>(entity: ObjectType<T>, criteria: FindOneOptions<T>["where"]): Promise<T | null> {

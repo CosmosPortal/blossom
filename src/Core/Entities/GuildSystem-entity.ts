@@ -1,6 +1,7 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { InfractionSystem } from "./InfractionSystem";
-import { ReportSystem } from "./ReportSystem";
+import { InfractionSystem } from "./InfractionSystem-entity";
+import { ReportSystem } from "./ReportSystem-entity";
+import { TagSystem } from "./TagSystem-entity";
 
 @Entity({ name: "GuildSystem" })
 export class GuildSystem {
@@ -15,4 +16,7 @@ export class GuildSystem {
 
     @OneToMany(() => ReportSystem, (report_system) => report_system.Guild)
     Reports!: ReportSystem[];
+
+    @OneToMany(() => TagSystem, (tag_system) => tag_system.Guild)
+    Tags!: TagSystem[];
 };

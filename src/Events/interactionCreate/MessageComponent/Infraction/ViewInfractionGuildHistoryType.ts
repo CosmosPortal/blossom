@@ -1,6 +1,6 @@
 import { ButtonBuilder, StringSelectMenuBuilder } from "@cosmosportal/blossom.utils";
 import { ButtonStyle, EmbedBuilder, type Client, type MessageComponentInteraction } from "discord.js";
-import { ActionTypeName, Blossom, FormatInfraction, Sentry, type InfractionType } from "../../../../Core";
+import { ActionName, Blossom, FormatInfraction, Sentry, type InfractionType } from "../../../../Core";
 import type { CommandKit } from "commandkit";
 
 export default async function (interaction: MessageComponentInteraction, client: Client<true>, handler: CommandKit): Promise<undefined> {
@@ -80,15 +80,15 @@ export default async function (interaction: MessageComponentInteraction, client:
         placeholder: "Infraction Types"
     }).BuildActionRow();
 
-    const infraction_history = await FormatInfraction(interaction.guild.id, {
+    const infractions = await FormatInfraction(interaction.guild.id, {
         is_inactive: is_inactive,
         type: type
     });
-    if (!infraction_history) return void await Blossom.CreateInteractionError(interaction, `${interaction.guild.name} doesn't have any ${ActionTypeName[type].toLowerCase()} action IDs that exist. To view inactive action IDs, make sure \`is_inactive\` option is toggle to \`true\`.`);
+    if (!infractions) return void await Blossom.CreateInteractionError(interaction, `${interaction.guild.name} doesn't have any ${ActionName[type].toLowerCase()} infraction IDs that exist.`);
 
     const embed_one = new EmbedBuilder()
     .setThumbnail(interaction.guild.iconURL({ forceStatic: false, size: 4096 }))
-    .setDescription(infraction_history)
+    .setDescription(infractions)
     .setColor(Blossom.DefaultHex());
 
     return void await interaction.editReply({ embeds: [embed_one], components: [action_row_one, action_row_two] });

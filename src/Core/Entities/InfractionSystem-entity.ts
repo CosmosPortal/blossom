@@ -1,5 +1,5 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { GuildSystem } from "./GuildSystem";
+import { GuildSystem } from "./GuildSystem-entity";
 
 @Entity({ name: "InfractionSystem" })
 export class InfractionSystem {
@@ -7,16 +7,16 @@ export class InfractionSystem {
     id!: number;
 
     @Column()
-    ActionID!: string;
+    Active!: boolean;
 
     @Column()
-    Active!: boolean;
+    BlossomID!: string;
 
     @Column()
     CaseID!: number;
 
     @Column()
-    CreationTimestamp!: string;
+    CreationTimestamp!: number;
 
     @Column({ nullable: true })
     EvidenceAttachmentURL!: string;
@@ -33,20 +33,11 @@ export class InfractionSystem {
     @Column({ nullable: true })
     RemovalStaffID!: string;
 
-    @Column({ nullable: true })
-    RemovalStaffUsername!: string;
-
     @Column()
     StaffID!: string;
 
     @Column()
-    StaffUsername!: string;
-
-    @Column()
     TargetID!: string;
-
-    @Column()
-    TargetUsername!: string;
 
     @Column()
     Type!: string;

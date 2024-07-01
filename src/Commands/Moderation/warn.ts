@@ -1,6 +1,6 @@
 import { ChatInputCommandBuilder, CompareRolePosition } from "@cosmosportal/blossom.utils";
 import { ApplicationCommandOptionType, EmbedBuilder } from "discord.js";
-import { ActionTypeName, Blossom, Color, CreateActionID, CreateInfraction, FindInfraction, FindOneEntity, FindOrCreateEntity, InfractionMessage, InfractionSystem, ModerationSetting, Sentry, UpdateEntity, UpdateGuildID, UpdateMemberID, type InfractionType } from "../../Core";
+import { ActionName, Blossom, Color, CreateInfraction, FindInfraction, FindOneEntity, FindOrCreateEntity, InfractionMessage, InfractionSystem, ModerationSetting, Sentry, UpdateEntity, UpdateGuildID, UpdateMemberID, type InfractionType } from "../../Core";
 import custom_moderation_reason from "../../Core/JSON/CustomModerationReason.json";
 import type { AutocompleteProps, CommandData, SlashCommandProps } from "commandkit";
 
@@ -41,8 +41,8 @@ export const data: CommandData = new ChatInputCommandBuilder({
                     required: true
                 },
                 {
-                    name: "action_id",
-                    description: "The warning action ID to remove",
+                    name: "infraction_id",
+                    description: "The warning infraction ID to remove",
                     type: ApplicationCommandOptionType.String,
                     autocomplete: true,
                     required: true
@@ -83,8 +83,8 @@ export const data: CommandData = new ChatInputCommandBuilder({
             type: ApplicationCommandOptionType.Subcommand,
             options: [
                 {
-                    name: "action_id",
-                    description: "The warning action ID to view",
+                    name: "infraction_id",
+                    description: "The warning infraction ID to view",
                     type: ApplicationCommandOptionType.String,
                     autocomplete: true,
                     required: true
@@ -131,22 +131,16 @@ export async function run({ client, handler, interaction }: SlashCommandProps): 
         const case_id = await UpdateGuildID(interaction.guild.id, "InfractionCreation");
         await UpdateMemberID(`${member.id}_${interaction.guild.id}`, "WarnInfraction", true);
         const creation_timestamp = Date.now();
-        const action_id = CreateActionID(creation_timestamp);
         const infraction = await CreateInfraction({
             Snowflake: interaction.guild.id,
-            ActionID: action_id,
-            Active: true,
             CaseID: case_id,
-            CreationTimestamp: `${creation_timestamp}`,
+            CreationTimestamp: creation_timestamp,
             EvidenceAttachmentURL: "",
             Reason: reason ?? `No reason was provided for the warning by ${interaction.user.tag}`,
             RemovalReason: "",
             RemovalStaffID: "",
-            RemovalStaffUsername: "",
             StaffID: interaction.user.id,
-            StaffUsername: interaction.user.tag,
             TargetID: member.id,
-            TargetUsername: member.user.tag,
             Type: "WarnAdd"
         });
 
@@ -177,18 +171,17 @@ export async function run({ client, handler, interaction }: SlashCommandProps): 
         if (interaction.user.id !== interaction.guild.ownerId && !await CompareRolePosition(interaction.guild, interaction.user.id, member.id, true)) return void await Blossom.CreateInteractionError(interaction, `You cannot run </${interaction.commandName} ${interaction.options.getSubcommand()}:${interaction.commandId}> on a member with a higher role than you.`);
         if (!await CompareRolePosition(interaction.guild, client.user.id, member.id, true)) return void await Blossom.CreateInteractionError(interaction, `The member you entered has a higher role than ${client.user.username}.`);
 
-        const warning = await FindOneEntity(InfractionSystem, { TargetID: member.id, ActionID: interaction.options.getString("action_id", true) });
+        const warning = await FindOneEntity(InfractionSystem, { TargetID: member.id, BlossomID: interaction.options.getString("infraction_id", true) });
         if (!warning) return void await Blossom.CreateInteractionError(interaction, "The warning action ID you entered doesn't exist for this member.");
         if (!warning.Active) return void await Blossom.CreateInteractionError(interaction, "The warning action ID you entered is marked as inactive.");
 
         await UpdateMemberID(`${member.id}_${interaction.guild.id}`, "WarnInfraction", true);
-        await UpdateEntity(InfractionSystem, { TargetID: member.id, ActionID: interaction.options.getString("action_id", true) }, {
+        await UpdateEntity(InfractionSystem, { TargetID: member.id, BlossomID: interaction.options.getString("infraction_id", true) }, {
             Active: false,
             RemovalReason: reason ?? `No reason was provided for the warning removal by ${interaction.user.tag}`,
-            RemovalStaffID: interaction.user.id,
-            RemovalStaffUsername: interaction.user.tag
+            RemovalStaffID: interaction.user.id
         });
-        const infraction = await FindOneEntity(InfractionSystem, { TargetID: member.id, ActionID: interaction.options.getString("action_id", true) }) as InfractionSystem;
+        const infraction = await FindOneEntity(InfractionSystem, { TargetID: member.id, BlossomID: interaction.options.getString("infraction_id", true) }) as InfractionSystem;
 
         const infraction_message = new InfractionMessage({
             client: client,
@@ -219,22 +212,16 @@ export async function run({ client, handler, interaction }: SlashCommandProps): 
 
         const case_id = await UpdateGuildID(interaction.guild.id, "InfractionCreation");
         const creation_timestamp = Date.now();
-        const action_id = CreateActionID(creation_timestamp);
         const infraction = await CreateInfraction({
             Snowflake: interaction.guild.id,
-            ActionID: action_id,
-            Active: true,
             CaseID: case_id,
-            CreationTimestamp: `${creation_timestamp}`,
+            CreationTimestamp: creation_timestamp,
             EvidenceAttachmentURL: "",
             Reason: reason ?? `No reason was provided for the verbal warning by ${interaction.user.tag}`,
             RemovalReason: "",
             RemovalStaffID: "",
-            RemovalStaffUsername: "",
             StaffID: interaction.user.id,
-            StaffUsername: interaction.user.tag,
             TargetID: member.id,
-            TargetUsername: member.user.tag,
             Type: "WarnVerbal"
         });
 
@@ -256,26 +243,29 @@ export async function run({ client, handler, interaction }: SlashCommandProps): 
     if (interaction.options.getSubcommand() === "view") {
         const user = interaction.options.getUser("user", false) ?? interaction.user;
         const warning = await FindInfraction(interaction.guild.id, {
-            action_id: interaction.options.getString("action_id", true),
+            blossom_id: interaction.options.getString("infraction_id", true),
             from_member: user.id,
             is_inactive: interaction.options.getBoolean("is_inactive", false) ?? false,
             return_one: true
         }) as unknown as InfractionSystem | null;
-        if (!warning) return void await Blossom.CreateInteractionError(interaction, "The warning action ID you entered doesn't exist. If you are trying to view an inactive warning, make sure `is_inactive` option is toggle to `true`. If this warning belongs to another user, make sure to mention/enter user ID in the `user` option.");
+        if (!warning) return void await Blossom.CreateInteractionError(interaction, "The warning infraction ID you entered doesn't exist. If you are trying to view an inactive warning, make sure `is_inactive` option is toggle to `true`. If this warning belongs to another user, make sure to mention/enter user ID in the `user` option.");
+
+        const staff = await client.users.fetch(warning.StaffID).catch(() => { return undefined });
+        const removal_staff = await client.users.fetch(warning.RemovalStaffID).catch(() => { return undefined });
 
         const fields = [
-            { name: "Moderation Information", value: `- **Action ID** • ${warning.ActionID}\n- **Creation** • <t:${Math.trunc(Math.floor(Number(warning.CreationTimestamp) / 1000))}:D>\n- **Status** • ${warning.Active == true ? "Active" : "Inactive"}\n- **Staff Member** • ${warning.StaffUsername} [\`${warning.StaffID}\`]\n- **Target Member** • ${warning.TargetUsername} [\`${warning.TargetID}\`]` },
+            { name: "Moderation Information", value: `- **Infraction ID** • ${warning.BlossomID}\n- **Creation** • <t:${Math.trunc(Math.floor(warning.CreationTimestamp / 1000))}:D>\n- **Status** • ${warning.Active == true ? "Active" : "Inactive"}\n- **Staff Member** • ${staff?.tag ?? "unknown"} [\`${warning.StaffID}\`]\n- **Target Member** • ${user.tag} [\`${warning.TargetID}\`]` },
             { name: "Reason", value: warning.Reason }
         ];
 
-        if (warning.RemovalReason && warning.RemovalStaffID && warning.RemovalStaffUsername) fields.push(
-            { name: "Removal Information", value: `- **Staff Member** • ${warning.RemovalStaffUsername} [\`${warning.RemovalStaffID}\`]` },
+        if (warning.RemovalReason && warning.RemovalStaffID) fields.push(
+            { name: "Removal Information", value: `- **Staff Member** • ${removal_staff?.tag ?? "unknown"} [\`${warning.RemovalStaffID}\`]` },
             { name: "Removal Reason", value: warning.RemovalReason }
         );
 
         const embed_one = new EmbedBuilder()
         .setThumbnail(user.displayAvatarURL({ forceStatic: false, size: 4096 }))
-        .setAuthor({ name: `Case #${warning.CaseID} | ${ActionTypeName[warning.Type as InfractionType]}` })
+        .setAuthor({ name: `Case #${warning.CaseID} | ${ActionName[warning.Type as InfractionType]}` })
         .setFields(fields)
         .setColor(Color[warning.Type as InfractionType]);
 
@@ -303,11 +293,11 @@ export async function autocomplete({ client, handler, interaction }: Autocomplet
         const focused = interaction.options.getFocused();
         const infractions = await FindInfraction(interaction.guild.id, { is_inactive: true }) as InfractionSystem[] | null;
         if (!infractions) return;
-        const filter_choices = infractions.filter((infraction) => infraction.ActionID.startsWith(focused));
+        const filter_choices = infractions.filter((infraction) => infraction.BlossomID.startsWith(focused));
         const result = filter_choices.map((choice) => {
             return {
-                name: `${choice.Active ? "Active" : "Inactive"} | ${choice.ActionID}`,
-                value: choice.ActionID
+                name: `${choice.Active ? "Active" : "Inactive"} | ${choice.BlossomID}`,
+                value: choice.BlossomID
             };
         });
 

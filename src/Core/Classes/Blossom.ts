@@ -1,7 +1,6 @@
 import { RoleManager } from "../Entities";
 import { FindOrCreateEntity } from "../Functions";
-import type { APIEmbed } from "discord-api-types/v10";
-import type { ContextMenuCommandInteraction, Guild, RepliableInteraction, User } from "discord.js";
+import type { APIEmbed, ContextMenuCommandInteraction, Guild, RepliableInteraction, User } from "discord.js";
 
 export class Blossom {
     /**

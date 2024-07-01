@@ -1,6 +1,6 @@
 import { ButtonBuilder, ChatInputCommandBuilder, ModalBuilder, StringSelectMenuBuilder } from "@cosmosportal/blossom.utils";
 import { ApplicationCommandOptionType, ButtonStyle, EmbedBuilder, TextInputStyle } from "discord.js";
-import { ActionTypeName, Blossom, Color, FindInfraction, FindOneEntity, FormatInfraction, InfractionSystem, Sentry, type InfractionType } from "../../Core";
+import { ActionName, Blossom, Color, FindInfraction, FindOneEntity, FormatInfraction, InfractionSystem, Sentry, type InfractionType } from "../../Core";
 import type { AutocompleteProps, CommandData, SlashCommandProps } from "commandkit";
 
 export const data: CommandData = new ChatInputCommandBuilder({
@@ -9,7 +9,7 @@ export const data: CommandData = new ChatInputCommandBuilder({
     options: [
         {
             name: "list",
-            description: "Searches the server for all action IDs for a certain infraction",
+            description: "Searches the server for all infraction IDs for a certain infraction",
             type: ApplicationCommandOptionType.Subcommand,
             options: [
                 {
@@ -30,7 +30,7 @@ export const data: CommandData = new ChatInputCommandBuilder({
                 },
                 {
                     name: "is_inactive",
-                    description: "If true, returns inactive action IDs as well",
+                    description: "If true, returns inactive infraction IDs as well",
                     type: ApplicationCommandOptionType.Boolean
                 }
             ]
@@ -41,8 +41,8 @@ export const data: CommandData = new ChatInputCommandBuilder({
             type: ApplicationCommandOptionType.Subcommand,
             options: [
                 {
-                    name: "action_id",
-                    description: "The infraction action ID to modify",
+                    name: "infraction_id",
+                    description: "The infraction ID to modify",
                     type: ApplicationCommandOptionType.String,
                     autocomplete: true,
                     required: true
@@ -67,15 +67,15 @@ export const data: CommandData = new ChatInputCommandBuilder({
             type: ApplicationCommandOptionType.Subcommand,
             options: [
                 {
-                    name: "action_id",
-                    description: "The infraction action ID to view",
+                    name: "infraction_id",
+                    description: "The infraction ID to view",
                     type: ApplicationCommandOptionType.String,
                     autocomplete: true,
                     required: true
                 },
                 {
                     name: "is_inactive",
-                    description: "If true, returns inactive action ID information as well",
+                    description: "If true, returns inactive infraction ID information as well",
                     type: ApplicationCommandOptionType.Boolean
                 }
             ]
@@ -94,15 +94,15 @@ export async function run({ client, handler, interaction }: SlashCommandProps): 
     if (interaction.options.getSubcommand() === "list") {
         await interaction.deferReply({ ephemeral: true });
 
-        const infraction_history = await FormatInfraction(interaction.guild.id, {
+        const infraction = await FormatInfraction(interaction.guild.id, {
             is_inactive: interaction.options.getBoolean("is_inactive", false) ?? false,
             type: interaction.options.getString("type", true) as InfractionType
         });
-        if (!infraction_history) return void await Blossom.CreateInteractionError(interaction, `${interaction.guild.name} doesn't have any ${ActionTypeName[interaction.options.getString("type", true) as InfractionType].toLowerCase()} action IDs that exist. To view inactive action IDs, make sure \`is_inactive\` option is toggle to \`true\`.`);
+        if (!infraction) return void await Blossom.CreateInteractionError(interaction, `${interaction.guild.name} doesn't have any ${ActionName[interaction.options.getString("type", true) as InfractionType].toLowerCase()} infraction IDs that exist. To view inactive infraction IDs, make sure \`is_inactive\` option is toggle to \`true\`.`);
 
         const embed_one = new EmbedBuilder()
         .setThumbnail(interaction.guild.iconURL({ forceStatic: false, size: 4096 }))
-        .setDescription(infraction_history)
+        .setDescription(infraction)
         .setColor(Blossom.DefaultHex());
 
         const action_row_one = new ButtonBuilder()
@@ -173,24 +173,24 @@ export async function run({ client, handler, interaction }: SlashCommandProps): 
     };
 
     if (interaction.options.getSubcommand() === "modify") {
-        const action_id = interaction.options.getString("action_id", true);
-        const infraction = await FindOneEntity(InfractionSystem, { ActionID: action_id, Guild_ID: interaction.guild.id });
-        if (!infraction) return void await Blossom.CreateInteractionError(interaction, `The action ID you entered doesn't exist in ${interaction.guild.name}.`);
+        const infraction_id = interaction.options.getString("infraction_id", true);
+        const infraction = await FindOneEntity(InfractionSystem, { BlossomID: infraction_id, Guild_ID: interaction.guild.id });
+        if (!infraction) return void await Blossom.CreateInteractionError(interaction, `The infraction ID you entered doesn't exist in ${interaction.guild.name}.`);
 
         if (interaction.options.getString("alter", true) === "MarkActive") {
-            if (infraction.Active) return void await Blossom.CreateInteractionError(interaction, "You cannot mark the aciton ID as active due to it being active already.");
+            if (infraction.Active) return void await Blossom.CreateInteractionError(interaction, "You cannot mark the infraction ID as active due to it being active already.");
 
             const modal_response = new ModalBuilder({
-                custom_id: `EditInfractionMarkActive_${action_id}`,
+                custom_id: `EditInfractionMarkActive_${infraction_id}`,
                 title: "Infraction System | Editor"
             })
             .CreateTextInput({
                 custom_id: "reason",
-                label: "Reason for marking this action as active?",
+                label: "Reason for marking this infraction as active?",
                 style: TextInputStyle.Paragraph,
                 max_length: 250,
                 min_length: 5,
-                placeholder: "Please provide a reason for marking this action ID as active",
+                placeholder: "Please provide a reason for marking this infraction ID as active",
                 required: true
             }).BuildResponse();
 
@@ -198,19 +198,19 @@ export async function run({ client, handler, interaction }: SlashCommandProps): 
         };
 
         if (interaction.options.getString("alter", true) === "MarkInactive") {
-            if (!infraction.Active) return void await Blossom.CreateInteractionError(interaction, "You cannot mark the aciton ID as inactive due to it being inactive already.");
+            if (!infraction.Active) return void await Blossom.CreateInteractionError(interaction, "You cannot mark the infraction ID as inactive due to it being inactive already.");
 
             const modal_response = new ModalBuilder({
-                custom_id: `EditInfractionMarkInactive_${action_id}`,
+                custom_id: `EditInfractionMarkInactive_${infraction_id}`,
                 title: "Infraction System | Editor"
             })
             .CreateTextInput({
                 custom_id: "reason",
-                label: "Reason for marking this action as inactive?",
+                label: "Reason for marking this infraction as inactive?",
                 style: TextInputStyle.Paragraph,
                 max_length: 250,
                 min_length: 5,
-                placeholder: "Please provide a reason for marking this action ID as inactive",
+                placeholder: "Please provide a reason for marking this infraction ID as inactive",
                 required: true
             }).BuildResponse();
 
@@ -218,10 +218,10 @@ export async function run({ client, handler, interaction }: SlashCommandProps): 
         };
 
         if (interaction.options.getString("alter", true) === "Reason") {
-            if (!infraction.Active) return void await Blossom.CreateInteractionError(interaction, "You cannot edit a reason for an action ID that is marked as inactive.");
+            if (!infraction.Active) return void await Blossom.CreateInteractionError(interaction, "You cannot edit a reason for an infraction ID that is marked as inactive.");
 
             const modal_response = new ModalBuilder({
-                custom_id: `EditInfractionReason_${action_id}`,
+                custom_id: `EditInfractionReason_${infraction_id}`,
                 title: "Infraction System | Editor"
             })
             .CreateTextInput({
@@ -238,10 +238,10 @@ export async function run({ client, handler, interaction }: SlashCommandProps): 
         };
 
         if (interaction.options.getString("alter", true) === "RemovalReason") {
-            if (infraction.Active) return void await Blossom.CreateInteractionError(interaction, "You cannot edit a removal reason for an action ID that is marked as active.");
+            if (infraction.Active) return void await Blossom.CreateInteractionError(interaction, "You cannot edit a removal reason for an infraction ID that is marked as active.");
 
             const modal_response = new ModalBuilder({
-                custom_id: `EditInfractionRemovalReason_${action_id}`,
+                custom_id: `EditInfractionRemovalReason_${infraction_id}`,
                 title: "Infraction System | Editor"
             })
             .CreateTextInput({
@@ -261,26 +261,29 @@ export async function run({ client, handler, interaction }: SlashCommandProps): 
     if (interaction.options.getSubcommand() === "view") {
         await interaction.deferReply({ ephemeral: true });
 
-        const action_id = interaction.options.getString("action_id", true);
-        const infraction = await FindOneEntity(InfractionSystem, { ActionID: action_id, Guild_ID: interaction.guild.id });
-        if (!infraction) return void await Blossom.CreateInteractionError(interaction, `The action ID you entered doesn't exist in ${interaction.guild.name}.`);
-
-        const fields = [
-            { name: "Moderation Information", value: `- **Action ID** • ${infraction.ActionID}\n- **Creation** • <t:${Math.trunc(Math.floor(Number(infraction.CreationTimestamp) / 1000))}:D>\n- **Status** • ${infraction.Active == true ? "Active" : "Inactive"}\n- **Staff Member** • ${infraction.StaffUsername} [\`${infraction.StaffID}\`]\n- **Target Member** • ${infraction.TargetUsername} [\`${infraction.TargetID}\`]` },
-            { name: "Reason", value: infraction.Reason }
-        ];
-
-        if (infraction.RemovalReason && infraction.RemovalStaffID && infraction.RemovalStaffUsername) fields.push(
-            { name: "Removal Information", value: `- **Staff Member** • ${infraction.RemovalStaffUsername} [\`${infraction.RemovalStaffID}\`]` },
-            { name: "Removal Reason", value: infraction.RemovalReason }
-        );
+        const infraction_id = interaction.options.getString("infraction_id", true);
+        const infraction = await FindOneEntity(InfractionSystem, { BlossomID: infraction_id, Guild_ID: interaction.guild.id });
+        if (!infraction) return void await Blossom.CreateInteractionError(interaction, `The infraction ID you entered doesn't exist in ${interaction.guild.name}.`);
 
         const user = await client.users.fetch(infraction.TargetID).catch(() => { return undefined });
         if (!user) return void await Blossom.CreateInteractionError(interaction, `An issue occured with fetching the target user. The user either no longer exist or ${client.user.username} couldn't fetch the user.`);
 
+        const staff = await client.users.fetch(infraction.StaffID).catch(() => { return undefined });
+        const removal_staff = await client.users.fetch(infraction.RemovalStaffID).catch(() => { return undefined });
+
+        const fields = [
+            { name: "Moderation Information", value: `- **Infraction ID** • ${infraction.BlossomID}\n- **Creation** • <t:${Math.trunc(Math.floor(infraction.CreationTimestamp / 1000))}:D>\n- **Status** • ${infraction.Active == true ? "Active" : "Inactive"}\n- **Staff Member** • ${staff?.tag ?? "unknown"} [\`${infraction.StaffID}\`]\n- **Target Member** • ${user.tag ?? "unknown"} [\`${infraction.TargetID}\`]` },
+            { name: "Reason", value: infraction.Reason }
+        ];
+
+        if (infraction.RemovalReason && infraction.RemovalStaffID) fields.push(
+            { name: "Removal Information", value: `- **Staff Member** • ${removal_staff?.tag ?? "unknown"} [\`${infraction.RemovalStaffID}\`]` },
+            { name: "Removal Reason", value: infraction.RemovalReason }
+        );
+
         const embed_one = new EmbedBuilder()
         .setThumbnail(user.displayAvatarURL({ forceStatic: false, size: 4096 }))
-        .setAuthor({ name: `Case #${infraction.CaseID} | ${ActionTypeName[infraction.Type as InfractionType]}` })
+        .setAuthor({ name: `Case #${infraction.CaseID} | ${ActionName[infraction.Type as InfractionType]}` })
         .setFields(fields)
         .setColor(Color[infraction.Type as InfractionType]);
 
@@ -295,11 +298,11 @@ export async function autocomplete({ client, handler, interaction }: Autocomplet
         const focused = interaction.options.getFocused();
         const infractions = await FindInfraction(interaction.guild.id, { is_inactive: true }) as InfractionSystem[] | null;
         if (!infractions) return;
-        const filter_choices = infractions.filter((infraction) => infraction.ActionID.startsWith(focused));
+        const filter_choices = infractions.filter((infraction) => infraction.BlossomID.startsWith(focused));
         const result = filter_choices.map((choice) => {
             return {
-                name: `${choice.Active ? "Active" : "Inactive"} | ${choice.ActionID}`,
-                value: choice.ActionID
+                name: `${choice.Active ? "Active" : "Inactive"} | ${choice.BlossomID}`,
+                value: choice.BlossomID
             };
         });
 

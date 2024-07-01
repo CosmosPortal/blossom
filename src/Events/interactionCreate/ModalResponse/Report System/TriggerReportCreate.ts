@@ -1,6 +1,6 @@
-import { ButtonBuilder, CompareRolePosition, CropText, HasChannelPermissions } from "@cosmosportal/blossom.utils";
+import { ButtonBuilder, CompareDate, CompareRolePosition, CropText, HasChannelPermissions } from "@cosmosportal/blossom.utils";
 import { ButtonStyle, ChannelType, EmbedBuilder, PermissionsBitField, type Client, type GuildTextBasedChannel, type ModalSubmitInteraction, type TextChannel } from "discord.js";
-import { ActionTypeName, Blossom, CompareDate, CreateActionID, CreateReport, FindOrCreateEntity, ReportSetting, ReportSystem, RoleManager, Sentry, UpdateEntity, UpdateGuildID, type ReportType } from "../../../../Core";
+import { ActionName, Blossom, CreateReport, FindOrCreateEntity, ReportSetting, ReportSystem, RoleManager, Sentry, UpdateEntity, UpdateGuildID, type ReportType } from "../../../../Core";
 import type { CommandKit } from "commandkit";
 
 export default async function (interaction: ModalSubmitInteraction, client: Client<true>, handler: CommandKit): Promise<undefined> {
@@ -39,29 +39,18 @@ export default async function (interaction: ModalSubmitInteraction, client: Clie
 
     const case_id = await UpdateGuildID(interaction.guild.id, "ReportCreation");
     const creation_timestamp = Date.now();
-    const action_id = CreateActionID(creation_timestamp);
     const report = await CreateReport({
         Snowflake: interaction.guild.id,
-        ActionID: action_id,
-        Active: true,
         CaseID: case_id,
-        CreationTimestamp: String(creation_timestamp),
+        CreationTimestamp: creation_timestamp,
         EvidenceAttachmentURL: "",
         FlaggedChannelID: channel.id,
         FlaggedMessageID: message.id,
-        HasBanAddLogged: false,
-        HasKickLogged: false,
-        HasTimeoutAddLogged: false,
-        HasWarnAddLogged: false,
-        HasWarnVerbalLogged: false,
-        IsMessageDeleted: false,
         Reason: reason,
         ReportChannelID: "",
         ReporterID: interaction.user.id,
-        ReporterUsername: interaction.user.tag,
         ReportMessageID: "",
         TargetID: user.id,
-        TargetUsername: user.tag,
         Type: "MessageReport"
     });
 
@@ -69,14 +58,14 @@ export default async function (interaction: ModalSubmitInteraction, client: Clie
 
     const embed_one = new EmbedBuilder()
     .setThumbnail(user.displayAvatarURL({ forceStatic: false, size: 4096 }))
-    .setAuthor({ name: `Case #${report.CaseID} | ${ActionTypeName[report.Type as ReportType]}` })
+    .setAuthor({ name: `Case #${report.CaseID} | ${ActionName[report.Type as ReportType]}` })
     .setDescription(`<@${user.id}>'s [message](${message.url} 'View Message') has been reported by <@${interaction.user.id}>.\n- **Reported User** • ${user.tag} [\`${user.id}\`]\n- **Reported Message**\n${message.content ? `||${CropText(message.content, 297, true)}||` : "There was no message content."}${attachment ? "\n- The message has a file!" : ""}\n- **Report Creation** • <t:${Math.trunc(Math.floor(creation_timestamp / 1000))}:D>`)
     .addFields(
         { name: "Reason", value: reason },
         { name: "Action Log", value: `None` }
     )
     .setImage(attachment)
-    .setFooter({ text: `Report ID • ${action_id} | Reported by ${interaction.user.tag}` })
+    .setFooter({ text: `Report ID • ${report.BlossomID} | Reported by ${interaction.user.tag}` })
     .setColor(Blossom.DefaultHex());
 
     const action_row_one = new ButtonBuilder()
@@ -132,15 +121,15 @@ export default async function (interaction: ModalSubmitInteraction, client: Clie
 
     if (report_setting.MessageReportThreadMode) {
         const report_thread = await report_channel.threads.create({
-            name: `Case #${report.CaseID} | ${ActionTypeName[report.Type as ReportType]}`,
-            reason: `Creating ${ActionTypeName[report.Type as ReportType]} Case #${report.CaseID}`,
+            name: `Case #${report.CaseID} | ${ActionName[report.Type as ReportType]}`,
+            reason: `Creating ${ActionName[report.Type as ReportType]} Case #${report.CaseID}`,
             type: ChannelType.PrivateThread
         });
 
         const report_message = await report_thread.send({ content: !report_setting.MessageReportNotifiedStaffTeam || guild_owner.length === 0 ? "" : staff_team_roles.join(" | "), embeds: [embed_one], components: [action_row_one, action_row_two], allowedMentions: { parse: [ "roles" ] } });
 
         await UpdateEntity(ReportSystem, {
-            ActionID: action_id,
+            BlossomID: report.BlossomID,
             Guild_ID: interaction.guild.id,
             TargetID: user.id
         }, {
@@ -152,7 +141,7 @@ export default async function (interaction: ModalSubmitInteraction, client: Clie
         const report_message = await report_channel.send({ content: !report_setting.MessageReportNotifiedStaffTeam || guild_owner.length === 0 ? "" : staff_team_roles.join(" | "), embeds: [embed_one], components: [action_row_one, action_row_two], allowedMentions: { parse: [ "roles" ] } });
 
         await UpdateEntity(ReportSystem, {
-            ActionID: action_id,
+            BlossomID: report.BlossomID,
             Guild_ID: interaction.guild.id,
             TargetID: user.id
         }, {

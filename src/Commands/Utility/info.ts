@@ -1,6 +1,6 @@
-import { ChatInputCommandBuilder, GuildChannelCount, MemberBannedStatus } from "@cosmosportal/blossom.utils";
+import { ChatInputCommandBuilder, FormatTime, GuildChannelCount, MemberBannedStatus } from "@cosmosportal/blossom.utils";
 import { ApplicationCommandOptionType, ChannelType, EmbedBuilder } from "discord.js";
-import { AppealSetting, Blossom, DiscordBadges, FindOrCreateEntity, FormatTime, GuildID, MemberID, ModerationSetting, RoleManager, Sentry } from "../../Core";
+import { AppealSetting, Blossom, DiscordBadges, FindOrCreateEntity, GuildID, MemberID, ModerationSetting, RoleManager, Sentry } from "../../Core";
 import type { CommandData, SlashCommandProps } from "commandkit";
 
 export const data: CommandData = new ChatInputCommandBuilder({
@@ -97,7 +97,7 @@ export async function run({ client, handler, interaction }: SlashCommandProps): 
             const member_rank = user.id === interaction.guild.ownerId ? "Owner" : !!roles.includes(role_manager.StaffTeamGuildOwner) ? "Owner" : !!roles.includes(role_manager.StaffTeamGuildAppManager) ? "Application Manager" : !!roles.includes(role_manager.StaffTeamGuildManager) ? "Server Manager" : !!roles.includes(role_manager.StaffTeamGuildModerator) ? "Moderator" : "Member";
 
             embed_one.setFields(
-                { name: "General Information", value: `- **Name** [\`${member.displayName}\`]\n - **Username** • ${user.tag}\n - **ID** • ${user.id}\n- **Creation** • <t:${Math.trunc(Math.floor(user.createdTimestamp / 1000))}:D>\n- **Joined** • <t:${Math.trunc(Math.floor(Number(member.joinedTimestamp) / 1000))}:D>\n- **Badges** • ${user_badges.join(" ")}` },
+                { name: "General Information", value: `- **Name** [\`${member.displayName}\`]\n - **Username** • ${user.tag}\n - **ID** • ${user.id}\n- **Creation** • <t:${Math.trunc(Math.floor(user.createdTimestamp / 1000))}:D>\n- **Joined** • <t:${Math.trunc(Math.floor(member.joinedTimestamp ?? 0 / 1000))}:D>\n- **Badges** • ${user_badges.join(" ")}` },
                 { name: `${client.user.username} Information`, value: `- **Warnings** • ${member_id.WarnInfraction}\n- **Server Ranked** • ${member_rank}` },
                 { name: `Account Roles [${total_roles}]`, value: display_roles.join(" | ") }
             );

@@ -1,7 +1,7 @@
-import { ButtonBuilder, HasChannelPermissions } from "@cosmosportal/blossom.utils";
+import { ButtonBuilder, CompareDate, HasChannelPermissions } from "@cosmosportal/blossom.utils";
 import { ButtonStyle, EmbedBuilder, PermissionsBitField, type Client, type GuildTextBasedChannel, type MessageComponentInteraction } from "discord.js";
 import { setTimeout } from "timers/promises";
-import { ActionTypeName, Blossom, CompareDate, FindOneEntity, ReportSystem, Sentry, UpdateEntity, type ReportType } from "../../../../Core";
+import { ActionName, Blossom, FindOneEntity, ReportSystem, Sentry, UpdateEntity, type ReportType } from "../../../../Core";
 import type { CommandKit } from "commandkit";
 
 export default async function (interaction: MessageComponentInteraction, client: Client<true>, handler: CommandKit): Promise<undefined> {
@@ -36,14 +36,14 @@ export default async function (interaction: MessageComponentInteraction, client:
 
     const embed_one = new EmbedBuilder()
     .setThumbnail(interaction.message.embeds[0].thumbnail?.url ?? null)
-    .setAuthor({ name: `Case #${report_system.CaseID} | ${ActionTypeName[report_system.Type as ReportType]}` })
+    .setAuthor({ name: `Case #${report_system.CaseID} | ${ActionName[report_system.Type as ReportType]}` })
     .setDescription(interaction.message.embeds[0].description)
     .addFields(
         { name: "Reason", value: interaction.message.embeds[0].fields[0].value },
         { name: "Action Log", value: interaction.message.embeds[0].fields[1].value === "None" ? `- <@${interaction.user.id}> **deleted a message** | <t:${Math.trunc(Math.floor(creation_timestamp / 1000))}:R>` : `${interaction.message.embeds[0].fields[1].value}\n- <@${interaction.user.id}> **deleted a message** | <t:${Math.trunc(Math.floor(creation_timestamp / 1000))}:R>` }
     )
     .setImage(interaction.message.embeds[0].image?.url ?? null)
-    .setFooter({ text: `Report ID • ${report_system.ActionID} | Reported by ${report_system.ReporterUsername}` })
+    .setFooter({ text: interaction.message.embeds[0].footer?.text ?? "An issue occured" })
     .setColor(Blossom.DefaultHex());
 
     const action_row_one = new ButtonBuilder()

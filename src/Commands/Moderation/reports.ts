@@ -1,6 +1,6 @@
 import { ButtonBuilder, ChatInputCommandBuilder, StringSelectMenuBuilder } from "@cosmosportal/blossom.utils";
 import { ApplicationCommandOptionType, ButtonStyle, EmbedBuilder } from "discord.js";
-import { ActionTypeName, Blossom, FormatReport, Sentry, type ReportType } from "../../Core";
+import { ActionName, Blossom, FormatReport, Sentry, type ReportType } from "../../Core";
 import type { CommandData, SlashCommandProps } from "commandkit";
 
 export const data: CommandData = new ChatInputCommandBuilder({
@@ -47,7 +47,7 @@ export async function run({ client, handler, interaction }: SlashCommandProps): 
             is_inactive: interaction.options.getBoolean("is_inactive", false) ?? false,
             type: interaction.options.getString("type", true) as ReportType
         });
-        if (!reports) return void await Blossom.CreateInteractionError(interaction, `${interaction.guild.name} doesn't have any ${ActionTypeName[interaction.options.getString("type", true) as ReportType].toLowerCase()} action IDs that exist. To view inactive action IDs, make sure \`is_inactive\` option is toggle to \`true\`.`);
+        if (!reports) return void await Blossom.CreateInteractionError(interaction, `${interaction.guild.name} doesn't have any ${ActionName[interaction.options.getString("type", true) as ReportType].toLowerCase()} action IDs that exist. To view inactive action IDs, make sure \`is_inactive\` option is toggle to \`true\`.`);
 
         const embed_one = new EmbedBuilder()
         .setThumbnail(interaction.guild.iconURL({ forceStatic: false, size: 4096 }))

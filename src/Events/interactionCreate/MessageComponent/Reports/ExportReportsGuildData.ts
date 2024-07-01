@@ -1,5 +1,5 @@
 import { AttachmentBuilder, type Client, type MessageComponentInteraction } from "discord.js";
-import { ActionTypeName, Blossom, FindReport, FindOrCreateEntity, GuildID, Sentry, type ReportSystem, type ReportType } from "../../../../Core";
+import { ActionName, Blossom, FindReport, FindOrCreateEntity, GuildID, Sentry, type ReportSystem, type ReportType } from "../../../../Core";
 import type { CommandKit } from "commandkit";
 
 export default async function (interaction: MessageComponentInteraction, client: Client<true>, handler: CommandKit): Promise<undefined> {
@@ -19,11 +19,11 @@ export default async function (interaction: MessageComponentInteraction, client:
         is_inactive: true,
         type: type
     }) as ReportSystem[] | null;
-    if (!reports) return void await Blossom.CreateInteractionError(interaction, `${interaction.guild.name} doesn't have any ${ActionTypeName[type].toLowerCase()} action IDs that exist.`);
+    if (!reports) return void await Blossom.CreateInteractionError(interaction, `${interaction.guild.name} doesn't have any ${ActionName[type].toLowerCase()} report IDs that exist.`);
 
     const data = reports.map((report) => {
         return {
-            actionID: report.ActionID,
+            reportID: report.BlossomID,
             active: report.Active,
             caseID: String(report.CaseID),
             creationTimestamp: report.CreationTimestamp,
@@ -40,9 +40,7 @@ export default async function (interaction: MessageComponentInteraction, client:
             reportChannelID: report.ReportChannelID,
             reportMessageID: report.ReportMessageID,
             reporterID: "anonymous",
-            reporterUsername: "anonymous",
             targetID: report.TargetID,
-            targetUsername: report.TargetUsername,
             type: report.Type
         }
     });

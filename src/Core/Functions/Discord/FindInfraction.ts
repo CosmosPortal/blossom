@@ -21,7 +21,7 @@ export async function FindInfraction(guild_id: Snowflake, data: FindInfractionDa
     .leftJoinAndSelect("InfractionSystem.Guild", "Guild")
     .where("InfractionSystem.Guild_ID = :Guild_ID", { Guild_ID: guild_id })
 
-    if (data.action_id) infractions = infractions.andWhere("InfractionSystem.ActionID = :ActionID", { ActionID: data.action_id });
+    if (data.blossom_id) infractions = infractions.andWhere("InfractionSystem.BlossomID = :BlossomID", { BlossomID: data.blossom_id });
     if (data.from_member) infractions = infractions.andWhere("InfractionSystem.TargetID = :TargetID", { TargetID: data.from_member });
     if (!data.is_inactive) infractions = infractions.andWhere("InfractionSystem.Active = :Active", { Active: true });
     if (data.type) infractions = infractions.andWhere("InfractionSystem.Type = :Type", { Type: data.type });

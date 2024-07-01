@@ -1,7 +1,8 @@
 import "dotenv/config";
 import { CommandKit } from "commandkit";
 import { Client, GatewayIntentBits, Partials } from "discord.js";
-import * as path from "node:path";
+import { join } from "node:path";
+import { Connect } from "./Core";
 
 const client = new Client<true>({
     intents: [ GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessages, GatewayIntentBits.Guilds, GatewayIntentBits.MessageContent ],
@@ -11,8 +12,14 @@ const client = new Client<true>({
 
 new CommandKit({
     client,
-    commandsPath: path.join(__dirname, "Commands"),
-    eventsPath: path.join(__dirname, "Events")
+    commandsPath: join(__dirname, "Commands"),
+    eventsPath: join(__dirname, "Events")
 });
 
-client.login(process.env.CLIENT_TOKEN);
+async function BlossomLogin() {
+    await Connect();
+    console.log(`[Database Connected] | ${client.user.username} is connected to TypeORM`);
+    await client.login(process.env.CLIENT_TOKEN);
+};
+
+BlossomLogin();

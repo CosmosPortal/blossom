@@ -1,7 +1,7 @@
 import { ButtonBuilder, CompareRolePosition, MemberBannedStatus, MemberHasPermissions } from "@cosmosportal/blossom.utils";
 import { ButtonStyle, EmbedBuilder, PermissionsBitField, type Client, type ModalSubmitInteraction } from "discord.js";
 import { setTimeout } from "timers/promises";
-import { ActionTypeName, Blossom, CreateActionID, CreateInfraction, FindOneEntity, FindOrCreateEntity, InfractionMessage, ModerationSetting, ReportSystem, Sentry, UpdateEntity, UpdateGuildID, type ReportType } from "../../../../Core";
+import { ActionName, Blossom, CreateInfraction, FindOneEntity, FindOrCreateEntity, InfractionMessage, ModerationSetting, ReportSystem, Sentry, UpdateEntity, UpdateGuildID, type ReportType } from "../../../../Core";
 import type { CommandKit } from "commandkit";
 
 export default async function (interaction: ModalSubmitInteraction, client: Client<true>, handler: CommandKit): Promise<undefined> {
@@ -38,22 +38,16 @@ export default async function (interaction: ModalSubmitInteraction, client: Clie
     const delete_messages = moderation_setting.BanDeleteMessagesHistory;
     const case_id = await UpdateGuildID(interaction.guild.id, "InfractionCreation");
     const creation_timestamp = Date.now();
-    const action_id = CreateActionID(creation_timestamp);
     const infraction = await CreateInfraction({
         Snowflake: interaction.guild.id,
-        ActionID: action_id,
-        Active: true,
         CaseID: case_id,
-        CreationTimestamp: `${creation_timestamp}`,
+        CreationTimestamp: creation_timestamp,
         EvidenceAttachmentURL: "",
         Reason: reason ?? `No reason was provided for the ban by ${interaction.user.tag}`,
         RemovalReason: "",
         RemovalStaffID: "",
-        RemovalStaffUsername: "",
         StaffID: interaction.user.id,
-        StaffUsername: interaction.user.tag,
         TargetID: user.id,
-        TargetUsername: user.tag,
         Type: "BanAdd"
     });
 
@@ -74,14 +68,14 @@ export default async function (interaction: ModalSubmitInteraction, client: Clie
 
     const embed_one = new EmbedBuilder()
     .setThumbnail(interaction.message.embeds[0].thumbnail?.url ?? null)
-    .setAuthor({ name: `Case #${report_system.CaseID} | ${ActionTypeName[report_system.Type as ReportType]}` })
+    .setAuthor({ name: `Case #${report_system.CaseID} | ${ActionName[report_system.Type as ReportType]}` })
     .setDescription(interaction.message.embeds[0].description)
     .addFields(
         { name: "Reason", value: interaction.message.embeds[0].fields[0].value },
         { name: "Action Log", value: interaction.message.embeds[0].fields[1].value === "None" ? `- <@${interaction.user.id}> issued a **ban** | <t:${Math.trunc(Math.floor(creation_timestamp / 1000))}:R>` : `${interaction.message.embeds[0].fields[1].value}\n- <@${interaction.user.id}> issued a **ban** | <t:${Math.trunc(Math.floor(creation_timestamp / 1000))}:R>` }
     )
     .setImage(interaction.message.embeds[0].image?.url ?? null)
-    .setFooter({ text: `Report ID • ${report_system.ActionID} | Reported by ${report_system.ReporterUsername}` })
+    .setFooter({ text: interaction.message.embeds[0].footer?.text ?? "An issue occured" })
     .setColor(Blossom.DefaultHex());
 
     const action_row_one = new ButtonBuilder()

@@ -1,4 +1,4 @@
-export enum ActionTypeName {
+export enum ActionName {
     /**
      * Adds a ban to a user
      */
