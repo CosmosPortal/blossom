@@ -44,7 +44,6 @@ export default async function (interaction: MessageComponentInteraction, client:
     })
     .CreateLinkButton({
         custom_id: banner_url,
-        style: ButtonStyle.Link,
         label: "Copy URL"
     }).BuildActionRow();
 

@@ -79,8 +79,7 @@ export default async function (interaction: MessageComponentInteraction, client:
         })
         .CreateLinkButton({
             custom_id: "https://github.com/CosmosPortal/blossom#readme",
-            style: ButtonStyle.Link,
-            label: "Documentation"
+                label: "Documentation"
         }).BuildActionRow();
 
         return void await interaction.editReply({ embeds: [embed_one], components: [action_row_one, action_row_two] });
@@ -141,8 +140,7 @@ export default async function (interaction: MessageComponentInteraction, client:
         })
         .CreateLinkButton({
             custom_id: "https://github.com/CosmosPortal/blossom#readme",
-            style: ButtonStyle.Link,
-            label: "Documentation"
+                label: "Documentation"
         }).BuildActionRow();
 
         return void await interaction.editReply({ embeds: [embed_one], components: [action_row_one, action_row_two] });

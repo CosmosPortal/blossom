@@ -51,7 +51,6 @@ export async function run({ client, handler, interaction }: SlashCommandProps): 
     })
     .CreateLinkButton({
         custom_id: user.displayAvatarURL({ forceStatic: false, size: 4096 }),
-        style: ButtonStyle.Link,
         label: "Copy URL"
     }).BuildActionRow();
 

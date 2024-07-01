@@ -48,7 +48,6 @@ export default async function (interaction: MessageComponentInteraction, client:
     })
     .CreateLinkButton({
         custom_id: avatar_url,
-        style: ButtonStyle.Link,
         label: "Copy URL"
     }).BuildActionRow();
 

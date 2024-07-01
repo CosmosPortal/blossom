@@ -64,7 +64,6 @@ export default async function (interaction: ModalSubmitInteraction, client: Clie
     })
     .CreateLinkButton({
         custom_id: "https://github.com/CosmosPortal/blossom#readme",
-        style: ButtonStyle.Link,
         label: "Documentation"
     }).BuildActionRow();
 

@@ -95,7 +95,6 @@ export async function run({ client, handler, interaction }: SlashCommandProps): 
     })
     .CreateLinkButton({
         custom_id: "https://github.com/CosmosPortal/blossom#readme",
-        style: ButtonStyle.Link,
         label: "Documentation"
     }).BuildActionRow();
 

@@ -116,8 +116,7 @@ export class InfractionMessage {
             action_row_one.push(new ButtonBuilder()
             .CreateLinkButton({
                 custom_id: appeal_setting.AppealLink,
-                style: ButtonStyle.Link,
-                label: "Appeal"
+                        label: "Appeal"
             }).BuildActionRow());
         };
 

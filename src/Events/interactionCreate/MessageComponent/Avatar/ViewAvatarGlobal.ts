@@ -40,7 +40,6 @@ export default async function (interaction: MessageComponentInteraction, client:
     })
     .CreateLinkButton({
         custom_id: user.displayAvatarURL({ forceStatic: false, size: 4096 }),
-        style: ButtonStyle.Link,
         label: "Copy URL"
     }).BuildActionRow();
 

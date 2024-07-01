@@ -26,17 +26,14 @@ export async function run({ client, handler, interaction }: SlashCommandProps): 
     const action_row_one = new ButtonBuilder()
     .CreateLinkButton({
         custom_id: "https://discord.com/invite/starlight-cafe-706382255274328115",
-        style: ButtonStyle.Link,
         label: "Community Server"
     })
     .CreateLinkButton({
         custom_id: "https://discord.gg/wtHFmdvGVC",
-        style: ButtonStyle.Link,
         label: "Support Server"
     })
     .CreateLinkButton({
         custom_id: "https://github.com/CosmosPortal/blossom#readme",
-        style: ButtonStyle.Link,
         label: "Documentation"
     }).BuildActionRow();
 

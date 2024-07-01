@@ -78,7 +78,6 @@ export default async function (interaction: MessageComponentInteraction, client:
     })
     .CreateLinkButton({
         custom_id: "https://github.com/CosmosPortal",
-        style: ButtonStyle.Link,
         label: "Documentation"
     }).BuildActionRow();
 
